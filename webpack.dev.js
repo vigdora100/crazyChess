@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const merge = require('webpack-merge');
 const common = require('./webpack.common.js');
@@ -14,5 +15,12 @@ module.exports = merge(common, {
     libraryTarget: 'umd'
   },
   devServer: { contentBase: path.resolve(__dirname, 'dist') },
-  plugins: [new HtmlWebpackPlugin({ template: './src/index.html' })]
+  plugins: [new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new CopyWebpackPlugin([
+      { from: 'src/chessEngine/stockfish.js', to: 'dist/' }
+    ])
+  ],
+  node: {
+    fs: 'empty'
+  },
 });
