@@ -1,11 +1,11 @@
 import React, {Component} from 'react'; // eslint-disable-line no-unused-vars
 import PropTypes from 'prop-types';
 import Chess from 'chess.js';
-import RemovePiece from '../BonusCards/removePiece'
+import { MapWeaponCardsToClass } from '../BonusCards/MapWeaponCardsToClass'
 import { connect } from 'react-redux'
+import { forEach } from 'lodash'
 
 import Chessboard from '../Chessboard';
-import BonusCardsReducer from "../BonusCards/reducer";
 
 
 class HumanVsRandomBase extends Component {
@@ -82,22 +82,15 @@ class HumanVsRandomBase extends Component {
     };
 
     onSquareClick = square => {
-        const {removePiece} =  this.props
-
+        const {currentWeapon} =  this.props
 
         this.setState({
             squareStyles: {[square]: {backgroundColor: 'DarkTurquoise'}},
             pieceSquare: square
         });
 
-        if(removePiece){
-            let isTherePiece = this.game.get(square)
-            if(isTherePiece){
-                this.game.remove(square)
-                this.game.load(this.game.fen()) //we need to load the game from scretch since we can't remove
-                //an already moved piece - it is not enough removing
-                this.setState({fen: this.game.fen()});
-            }
+        if(currentWeapon){
+            MapWeaponCardsToClass[currentWeapon].onUseWeapon(this,square)
         }else {
             let move = this.game.move({
                 from: this.state.pieceSquare,
@@ -115,19 +108,28 @@ class HumanVsRandomBase extends Component {
 
     render() {
         const {fen, squareStyles} = this.state;
-        return this.props.children({
+        const {weaponCollection} =  this.props;
+        let WeaponComponents = []
+        forEach(weaponCollection, (weapon)=> {
+            WeaponComponents.push(MapWeaponCardsToClass[weapon]);
+        })
+        return(
+        <div>
+            {WeaponComponents.map(WeaponComponent=>(<WeaponComponent/>))}
+            {this.props.children({
             position: fen,
             onDrop: this.onDrop,
             onSquareClick: this.onSquareClick,
             squareStyles
-        });
+        })}
+        </div>)
     }
 }
 
 let mapStateToProps = (state) => {
-    console.log('state: ', state)
     return {
-        removePiece: state.bonusCard
+        currentWeapon: state.currentWeapon,
+        weaponCollection: state.weaponCollection
     }
 }
 
@@ -136,7 +138,6 @@ const HumanVsRandom = connect(mapStateToProps,null)(HumanVsRandomBase)
 export default function PlayRandomMoveEngine() {
     return (
         <div>
-            <RemovePiece/>
             <HumanVsRandom>
                 {({position, onDrop, onSquareClick, squareStyles}) => (
                     <Chessboard

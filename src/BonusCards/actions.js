@@ -1,9 +1,10 @@
 
 
-export const removePiece =()=> {
+export const useWeapon =(weaponType)=> {
 
     return {
-        type: "REMOVE_PIECE"
+        type: "USE_WEAPON",
+        weaponType: weaponType
     }
 
 }
