@@ -90,7 +90,7 @@ class HumanVsRandomBase extends Component {
         });
 
         if(currentWeapon){
-            MapWeaponCardsToClass[currentWeapon].onUseWeapon(this,square)
+            MapWeaponCardsToClass[currentWeapon.name].onUseWeapon(this,square,currentWeapon)
         }else {
             let move = this.game.move({
                 from: this.state.pieceSquare,
@@ -111,11 +111,11 @@ class HumanVsRandomBase extends Component {
         const {weaponCollection} =  this.props;
         let WeaponComponents = []
         forEach(weaponCollection, (weapon)=> {
-            WeaponComponents.push(MapWeaponCardsToClass[weapon]);
+            MapWeaponCardsToClass[weapon] &&WeaponComponents.push(MapWeaponCardsToClass[weapon]);
         })
         return(
         <div>
-            {WeaponComponents.map(WeaponComponent=>(<WeaponComponent/>))}
+            {WeaponComponents.map(WeaponComponent=>{return <WeaponComponent/>})}
             {this.props.children({
             position: fen,
             onDrop: this.onDrop,

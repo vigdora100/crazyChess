@@ -1,4 +1,4 @@
-let initialState = {currentWeapon: '', weaponCollection: ['REMOVE_PIECE','ADD_PIECE']};
+let initialState = {currentWeapon: {name: "", option: ""}, weaponCollection: ['REMOVE_PIECE','ADD_PIECE']};
 
 
 const BonusCardsReducer = (state = initialState, action) => {
@@ -6,7 +6,7 @@ const BonusCardsReducer = (state = initialState, action) => {
     switch (action.type) {
 
         case('USE_WEAPON') : {
-            return Object.assign({},state, {currentWeapon: action.weaponType})
+            return Object.assign({},state, {currentWeapon: {name: action.weaponType, options: action.weaponOptions }})
         }
         default:
             return initialState;

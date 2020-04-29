@@ -1,10 +1,11 @@
 
 
-export const useWeapon =(weaponType)=> {
+export const useWeapon =(weaponType,weaponOptions)=> {
 
     return {
         type: "USE_WEAPON",
-        weaponType: weaponType
+        weaponType: weaponType,
+        weaponOptions: weaponOptions
     }
 
 }

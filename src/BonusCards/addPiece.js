@@ -1,20 +1,38 @@
-import React from 'React'
+import React, {useState} from 'React'
 import {connect} from 'react-redux'
 import styled from 'styled-components'
 import {useWeapon} from './actions'
+import {Button, Popover, PopoverHeader, PopoverBody} from 'reactstrap';
+import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
+import {get} from 'lodash';
+
 
 const BonusCard = styled.button`
     width:100px;
     height: 50px;
 `
 
-class addPiece extends React.Component {
+const PieceButton = styled.button`
+`
 
-    static onUseWeapon = (chessBoard, square) => {
+const PiecesWrapper = styled.div`
+      border-color: black
+
+`
+
+class addPiece extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {popoverOpen: false};
+    }
+
+
+    static onUseWeapon = (chessBoard, square, weaponObj) => {
         const {game} = chessBoard
+        const {type, color} = get(weaponObj,'options.piece')
         let isTherePiece = game.get(square)
         if (!isTherePiece) {
-            let piece = { type: game.PAWN, color: game.WHITE }
+            let piece = { type: type, color: color }
             game.put(piece, square)
             game.load(game.fen()) //we need to load the game from scretch since we can't remove
             //an already moved piece - it is not enough removing
@@ -22,13 +40,51 @@ class addPiece extends React.Component {
         }
     }
 
+     choosePiece = (piece) =>{
+         const {useWeapon} = this.props
+         useWeapon('ADD_PIECE', {piece: piece })
+
+     }
 
     render() {
-        const { useWeapon } = this.props
+        const {useWeapon} = this.props
+        const {popoverOpen} = this.state
+        const toggle = () => this.setState({
+            popoverOpen: !this.state.popoverOpen
+        });
 
-        return (<BonusCard onClick={() => useWeapon('ADD_PIECE')}> Add piece </BonusCard>)
+        return (
+            <div>
+                <BonusCard id="Popover1" type="button">
+                    Add piece
+                </BonusCard>
+                <Popover placement="left" isOpen={popoverOpen} target="Popover1" toggle={toggle}>
+                    <PopoverHeader>Popover Title</PopoverHeader>
+                    <PopoverBody>
+                        <PiecesWrapper>
+                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'n'})}>
+                                {defaultPieces.wN}
+                            </PieceButton>
+                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'p'})}>
+                                {defaultPieces.wP}
+                            </PieceButton>
+                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'b'})}>
+                                {defaultPieces.wB}
+                            </PieceButton>
+                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'r'})}>
+                                {defaultPieces.wR}
+                            </PieceButton>
+                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'q'})}>
+                                {defaultPieces.wQ}
+                            </PieceButton>
+                        </PiecesWrapper>
+                    </PopoverBody>
+                </Popover>
+            </div>
+        )
     }
 }
+
 
 const mapDispatchToProps = {
 
