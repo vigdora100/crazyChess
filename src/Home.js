@@ -1,14 +1,22 @@
 import React from "react";
 import styled from "styled-components";
 import PlayRandomMoveEngine from './integrations/PlayRandomMoveEngine';
+import HumanVsHuman from './integrations/HumanVsHuman';
 import {get} from 'lodash'
+import Utils from './Chessboard/utils'
+import { browserHistory } from 'react-router'
+import HomeMenu from './HomeMenu'
+
+const {firebase} = window;
 
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link,
-    useLocation
+    useLocation,
+    HashRouter,
+    Redirect
 } from "react-router-dom";
 
 const Page = styled.div`
@@ -17,29 +25,41 @@ const Page = styled.div`
     align-items: center;
 `
 
-const MenuBox = styled.div`
-  display: flex;
-  border-color:  black;
-  height: 500px;
-  width: 500px;
-  flex-direction: row;
-  flex-wrap: wrap;
 
-  `;
 
-const MenuButton = styled(Link)`
+const HumanVsHumanButton = styled.button`
   width: 245px;
   height:300px;
   background-color: ${({color}) => (color)};
   font-size: 22px;
-
   `;
+
+
+
+const HumanVsHumanInit = () => {
+    const newGame = {
+        p1_token: Utils.token(),
+        p2_token: Utils.token()
+    };
+
+    const game = firebase.database().ref("games").push();
+
+    game.set(newGame)
+        .then(() => {
+            return <HumanVsHuman token={newGame.p1_token}/>
+            }, (err) => {
+            throw err;
+        });
+
+}
 
 export default function Home() {
     return (
         <Page>
             <Router>
                 <Switch>
+                    <Route exact path="/playVSHuman/:token"><HumanVsHuman/></Route>
+                    <Route path="/playVSHuman/"><HumanVsHuman/></Route>
                     <Route path={'/PlayRandomMoveEngine'}><PlayRandomMoveEngine/></Route>
                     <Route path={'/'}>
                         <HomeMenu/>
@@ -51,16 +71,11 @@ export default function Home() {
 }
 
 
-const HomeMenu = () => {
-    return (
-        <MenuBox>
-            <MenuButton color='#2ecc40' to={'/PlayRandomMoveEngine'}>play against computer</MenuButton>
-            <MenuButton color='#85144b' to={'/home'}> Home</MenuButton>
-            <MenuButton color='#ffdc00'> click here</MenuButton>
-            <MenuButton color='#dddddd'> click here</MenuButton>
-        </MenuBox>
-    )
-}
+
+
+
+
+
 
 
 

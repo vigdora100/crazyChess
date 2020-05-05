@@ -22,6 +22,18 @@
     <title>React App</title>
   </head>
   <body>
+    <!-- Initialize Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.7.0/firebase.js"></script>
+    <script>
+      var config = {
+        apiKey: "AIzaSyCP38PszdIdzDA6SUZA65PPLiiQgp2WFpE",
+        authDomain: "crazychess-4b7ac.firebaseapp.com",
+        databaseURL: "https://crazychess-4b7ac.firebaseio.com",
+        storageBucket: "crazychess-4b7ac.appspot.com",
+        messagingSenderId: "643022376958"
+      };
+      firebase.initializeApp(config);
+    </script>
     <script>var stockfishGlobal=new Worker('dist/stockfish.js')</script>
     <noscript>
       You need to enable JavaScript to run this app.

@@ -1,18 +1,26 @@
-import React, {Component} from 'react'; // eslint-disable-line no-unused-vars
+import React, {Component, Fragment} from 'react'; // eslint-disable-line no-unused-vars
 import PropTypes from 'prop-types';
 import Chess from 'chess.js';
 import { MapWeaponCardsToClass } from '../BonusCards/MapWeaponCardsToClass'
 import { connect } from 'react-redux'
 import { forEach } from 'lodash'
+import Arsenal  from '../components/arsenal'
+import styled from 'styled-components'
+
+const GameWrapper = styled.div`
+    display:flex;
+    align-items: center;
+`
 
 import Chessboard from '../Chessboard';
+
 
 
 class HumanVsRandomBase extends Component {
     static propTypes = {children: PropTypes.func};
 
 
-      onmessage = (event) => {
+    onmessage = (event) => {
         let message = event.data ? event.data : event;
         if(message.startsWith("bestmove")) {
             let move = message.split(" ")[1];
@@ -114,15 +122,17 @@ class HumanVsRandomBase extends Component {
             MapWeaponCardsToClass[weapon] &&WeaponComponents.push(MapWeaponCardsToClass[weapon]);
         })
         return(
-        <div>
-            {WeaponComponents.map(WeaponComponent=>{return <WeaponComponent/>})}
+        <Fragment>
+            <Arsenal>
+                {WeaponComponents.map(WeaponComponent=>{return <WeaponComponent/>})}
+            </Arsenal>
             {this.props.children({
             position: fen,
             onDrop: this.onDrop,
             onSquareClick: this.onSquareClick,
             squareStyles
         })}
-        </div>)
+        </Fragment>)
     }
 }
 
@@ -137,8 +147,8 @@ const HumanVsRandom = connect(mapStateToProps,null)(HumanVsRandomBase)
 
 export default function PlayRandomMoveEngine() {
     return (
-        <div>
-            <HumanVsRandom>
+        <GameWrapper>
+             <HumanVsRandom >
                 {({position, onDrop, onSquareClick, squareStyles}) => (
                     <Chessboard
                         calcWidth={({screenWidth}) => (screenWidth < 500 ? 350 : 480)}
@@ -154,6 +164,6 @@ export default function PlayRandomMoveEngine() {
                     />
                 )}
             </HumanVsRandom>
-        </div>
+        </GameWrapper>
     );
 }
