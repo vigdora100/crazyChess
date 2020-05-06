@@ -9,3 +9,15 @@ export const useWeapon =(weaponType,weaponOptions)=> {
     }
 
 }
+
+
+export const removeWeapon =(weaponType)=> {
+
+    return {
+        type: "REMOVE_WEAPON",
+        weaponType: weaponType,
+    }
+
+}
+
+

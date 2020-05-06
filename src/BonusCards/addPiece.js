@@ -1,7 +1,7 @@
 import React, {useState} from 'React'
 import {connect} from 'react-redux'
 import styled from 'styled-components'
-import {useWeapon} from './actions'
+import {removeWeapon} from './actions'
 import {Button, Popover, PopoverHeader, PopoverBody} from 'reactstrap';
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
 import {get} from 'lodash';
@@ -23,31 +23,41 @@ const PiecesWrapper = styled.div`
 class addPiece extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {popoverOpen: false};
+        this.state = {popoverOpen: false,weaponChosen: false};
     }
 
 
-    static onUseWeapon = (chessBoard, square, weaponObj) => {
-        const {game} = chessBoard
-        const {type, color} = get(weaponObj,'options.piece')
+     onUseWeapon = () => {
+        const {game, square, color, updateBoardFen, removeWeapon} =  this.props
+        const {pieceType} =  this.state
+        //const {type, color} = get(weaponObj,'options.piece')
         let isTherePiece = game.get(square)
         if (!isTherePiece) {
-            let piece = { type: type, color: color }
+            let piece = { type: pieceType, color: color }
             game.put(piece, square)
             game.load(game.fen()) //we need to load the game from scretch since we can't remove
             //an already moved piece - it is not enough removing
-            chessBoard.setState({fen: game.fen()});
+            updateBoardFen(game.fen());
+            removeWeapon("ADD_PIECE")
         }
     }
 
      choosePiece = (piece) =>{
-         const {useWeapon} = this.props
-         useWeapon('ADD_PIECE', {piece: piece })
-
+        const {useWeapon} = this.props;
+        this.setState({weaponChosen: true, pieceType: piece.type})
      }
 
+    componentDidUpdate(prevProps) {
+        const { weaponChosen } = this.state
+        if (this.props.square !== prevProps.square) {
+            if(weaponChosen){
+                this.onUseWeapon()
+            }
+        }
+    }
+
     render() {
-        const {useWeapon} = this.props
+        const {useWeapon, square} = this.props
         const {popoverOpen} = this.state
         const toggle = () => this.setState({
             popoverOpen: !this.state.popoverOpen
@@ -88,7 +98,7 @@ class addPiece extends React.Component {
 
 const mapDispatchToProps = {
 
-    useWeapon: useWeapon
+    removeWeapon: removeWeapon
 }
 
 

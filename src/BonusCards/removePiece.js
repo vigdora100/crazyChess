@@ -1,7 +1,7 @@
 import React from 'React'
 import {connect} from 'react-redux'
 import styled from 'styled-components'
-import {useWeapon} from './actions'
+import {removeWeapon, useWeapon} from './actions'
 
 const BonusCard = styled.button`
     width:100px;
@@ -10,28 +10,47 @@ const BonusCard = styled.button`
 
 class RemovePiece extends React.Component {
 
-    static onUseWeapon = (chessBoard, square) => {
-        const {game} = chessBoard
+    constructor(props) {
+        super(props);
+        this.state = {weaponChosen: false};
+    }
+
+     onUseWeapon = () => {
+        const {game, square, updateBoardFen,removeWeapon} = this.props
         let isTherePiece = game.get(square)
         if (isTherePiece) {
             game.remove(square)
             game.load(game.fen()) //we need to load the game from scretch since we can't remove
             //an already moved piece - it is not enough removing
-            chessBoard.setState({fen: game.fen()});
+            updateBoardFen(game.fen())
+            removeWeapon("REMOVE_PIECE")
         }
     }
 
+    componentDidUpdate(prevProps) {
+        const { weaponChosen } = this.state
+        if (this.props.square !== prevProps.square) {
+            if(weaponChosen){
+                this.onUseWeapon()
+            }
+        }
+    }
 
-render() {
+    choosePieceToRemove = (piece) =>{
+        const {useWeapon} = this.props;
+        this.setState({weaponChosen: true, pieceType: piece.type})
+    }
+
+
+    render() {
     const { useWeapon } = this.props
-
-    return (<BonusCard onClick={() => useWeapon('REMOVE_PIECE')}> Remove piece </BonusCard>)
+    return (<BonusCard onClick={this.choosePieceToRemove}> Remove piece </BonusCard>)
 }
 }
 
 const mapDispatchToProps = {
 
-    useWeapon: useWeapon
+    removeWeapon: removeWeapon
 }
 
 

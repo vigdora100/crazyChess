@@ -6,9 +6,8 @@ import {connect} from 'react-redux'
 import {forEach} from 'lodash'
 import Arsenal from '../components/arsenal'
 import styled from 'styled-components'
-import { get } from 'lodash'
-import { withRouter } from 'react-router'
-
+import {get} from 'lodash'
+import {withRouter} from 'react-router'
 
 
 const GameWrapper = styled.div`
@@ -35,12 +34,13 @@ class HumanVsRandomBase extends Component {
             dataBaseId: '',
             gameInDB: '',
             playerColor: '',
-            shouldShowInfo: ''
+            shouldShowInfo: '',
+            squareClicked: ''
         };
     }
 
     async componentDidMount() {
-        let token= get(this, 'props.match.params.token')
+        let token = get(this, 'props.match.params.token')
         const newGame = {
             p1_token: Utils.token(),
             p2_token: Utils.token()
@@ -52,7 +52,7 @@ class HumanVsRandomBase extends Component {
         token = token || newGame.p1_token;
         listenForUpdates(token, (id, game) => {
             this.setState({dataBaseId: id})
-            this.updateBoard(id, game,token)
+            this.updateBoard(id, game, token)
             this.game.load(game.fen)
         });
     }
@@ -78,13 +78,16 @@ class HumanVsRandomBase extends Component {
         games(dataBaseId).set(game)
     };
 
-    updateBoard = (id, game,token) => {
+    updateBoard = (id, game, token) => {
         const playerColor = figurePlayer(token, game);
         game.fen && this.setState({fen: game.fen});
         this.setState({gameInDB: game, playerColor: playerColor})
         console.log('playerColor: ', this.state.playerColor)
     }
 
+    updateBoardFEN = (FEN) => {
+        this.setState({fen: FEN})
+    }
 
     updateInfo = (token) => {
         this.setState({shouldShowInfo: token})
@@ -94,6 +97,7 @@ class HumanVsRandomBase extends Component {
     onSquareClick = square => {
         const {currentWeapon} = this.props;
         const {playerColor} = this.state;
+        this.setState({squareClicked: square})
 
         this.setState({
             squareStyles: {[square]: {backgroundColor: 'DarkTurquoise'}},
@@ -101,7 +105,7 @@ class HumanVsRandomBase extends Component {
         });
 
         if (currentWeapon) {
-            MapWeaponCardsToClass[currentWeapon.name].onUseWeapon(this, square, currentWeapon)
+            //do nothing, square click is weapon related
         } else {
             let move = (this.game.turn() === playerColor) && this.game.move({
                 from: this.state.pieceSquare,
@@ -118,7 +122,7 @@ class HumanVsRandomBase extends Component {
     };
 
     render() {
-        const {fen, squareStyles, playerColor, shouldShowInfo} = this.state;
+        const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked} = this.state;
         const {weaponCollection} = this.props;
         let WeaponComponents = []
         forEach(weaponCollection, (weapon) => {
@@ -128,8 +132,9 @@ class HumanVsRandomBase extends Component {
         return (
             <Fragment>
                 <Arsenal>
-                    {WeaponComponents.map(WeaponComponent => {
-                        return <WeaponComponent/>
+                    {WeaponComponents.map((WeaponComponent, index) => {
+                        return <WeaponComponent square={squareClicked} game={this.game} color={playerColor}
+                                                updateBoardFen={this.updateBoardFEN} key={index}/>
                     })}
                 </Arsenal>
                 {this.props.children({
@@ -215,7 +220,7 @@ const HumanVsRandom = connect(mapStateToProps, null)(withRouter(HumanVsRandomBas
 export default function PlayRandomMoveEngine(props) {
     return (
         <GameWrapper>
-            <HumanVsRandom >
+            <HumanVsRandom>
                 {({position, onDrop, onSquareClick, squareStyles, orientation}) => (
                     <Chessboard
                         orientation={orientation}
