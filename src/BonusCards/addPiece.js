@@ -1,10 +1,10 @@
-import React, {useState} from 'React'
-import {connect} from 'react-redux'
+import React, { useState } from 'React'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
-import {removeWeapon} from './actions'
-import {Button, Popover, PopoverHeader, PopoverBody} from 'reactstrap';
+import { removeWeapon } from './actions'
+import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
-import {get} from 'lodash';
+import { get } from 'lodash';
 
 
 const BonusCard = styled.button`
@@ -23,29 +23,31 @@ const PiecesWrapper = styled.div`
 class addPiece extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {popoverOpen: false,weaponChosen: false};
+        this.state = { popoverOpen: false, weaponChosen: false, turns: props.turns, piece: props.piece};
     }
 
 
-     onUseWeapon = () => {
-        const {game, square, color, updateBoardFen, removeWeapon} =  this.props
-        const {pieceType} =  this.state
-        //const {type, color} = get(weaponObj,'options.piece')
+
+
+    onUseWeapon = () => {
+        const { game, square, color, updateBoardFen, removeWeapon, options:{pieceType: pieceType} } = this.props
         let isTherePiece = game.get(square)
-        if (!isTherePiece) {
-            let piece = { type: pieceType, color: color }
-            game.put(piece, square)
-            game.load(game.fen()) //we need to load the game from scretch since we can't remove
-            //an already moved piece - it is not enough removing
-            updateBoardFen(game.fen());
-            removeWeapon("ADD_PIECE")
+        if (game.turn() === color) {
+            if (!isTherePiece) {
+                let piece = { type: pieceType, color: color }
+                game.put(piece, square)
+                game.load(game.fen()) //we need to load the game from scretch since we can't remove
+                //an already moved piece - it is not enough removing
+                updateBoardFen(game.fen());
+                removeWeapon("ADD_PIECE")
+            }
         }
     }
 
-     choosePiece = (piece) =>{
-        const {useWeapon} = this.props;
-        this.setState({weaponChosen: true, pieceType: piece.type})
-     }
+
+    clickOnWeapon = (piece) => {
+        this.setState({ weaponChosen: true})
+    }
 
     componentDidUpdate(prevProps) {
         const { weaponChosen } = this.state
@@ -57,40 +59,14 @@ class addPiece extends React.Component {
     }
 
     render() {
-        const {useWeapon, square} = this.props
-        const {popoverOpen} = this.state
-        const toggle = () => this.setState({
-            popoverOpen: !this.state.popoverOpen
-        });
+        const { options:{pieceType}, color, turns } = this.props
+     
 
+        let typeAndColorPiece = color + pieceType.toUpperCase();
         return (
-            <div>
-                <BonusCard id="Popover1" type="button">
-                    Add piece
-                </BonusCard>
-                <Popover placement="left" isOpen={popoverOpen} target="Popover1" toggle={toggle}>
-                    <PopoverHeader>Popover Title</PopoverHeader>
-                    <PopoverBody>
-                        <PiecesWrapper>
-                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'n'})}>
-                                {defaultPieces.wN}
-                            </PieceButton>
-                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'p'})}>
-                                {defaultPieces.wP}
-                            </PieceButton>
-                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'b'})}>
-                                {defaultPieces.wB}
-                            </PieceButton>
-                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'r'})}>
-                                {defaultPieces.wR}
-                            </PieceButton>
-                            <PieceButton onClick={()=>this.choosePiece({color: 'w', type: 'q'})}>
-                                {defaultPieces.wQ}
-                            </PieceButton>
-                        </PiecesWrapper>
-                    </PopoverBody>
-                </Popover>
-            </div>
+            <BonusCard onClick={this.clickOnWeapon}>
+                {defaultPieces[typeAndColorPiece]}
+            </BonusCard>
         )
     }
 }

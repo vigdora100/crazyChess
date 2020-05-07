@@ -14,7 +14,7 @@ const GameWrapper = styled.div`
     display:flex;
     align-items: center;
 `
-
+const STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 const {firebase} = window;
 
 
@@ -37,23 +37,24 @@ class HumanVsRandomBase extends Component {
             shouldShowInfo: '',
             squareClicked: ''
         };
+        this.game = new Chess();
     }
 
     async componentDidMount() {
         let token = get(this, 'props.match.params.token')
         const newGame = {
             p1_token: Utils.token(),
-            p2_token: Utils.token()
+            p2_token: Utils.token(),
+            fen: STARTING_FEN
         };
         const game = firebase.database().ref("games").push();
         await game.set(newGame)
-        !token && this.updateInfo(newGame.p2_token)
-        this.game = new Chess();
+        this.updateInfo(newGame.p2_token)
         token = token || newGame.p1_token;
         listenForUpdates(token, (id, game) => {
             this.setState({dataBaseId: id})
-            this.updateBoard(id, game, token)
             this.game.load(game.fen)
+            this.updateBoard(id, game, token)
         });
     }
 
@@ -82,7 +83,6 @@ class HumanVsRandomBase extends Component {
         const playerColor = figurePlayer(token, game);
         game.fen && this.setState({fen: game.fen});
         this.setState({gameInDB: game, playerColor: playerColor})
-        console.log('playerColor: ', this.state.playerColor)
     }
 
     updateBoardFEN = (FEN) => {
@@ -125,16 +125,18 @@ class HumanVsRandomBase extends Component {
         const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked} = this.state;
         const {weaponCollection} = this.props;
         let WeaponComponents = []
-        forEach(weaponCollection, (weapon) => {
-            MapWeaponCardsToClass[weapon] && WeaponComponents.push(MapWeaponCardsToClass[weapon]);
-        })
+        /* forEach(weaponCollection, (weaponObj) => {
+            MapWeaponCardsToClass[weaponObj.weaponType] && WeaponComponents.push(MapWeaponCardsToClass[weapon]);
+        }) */
         console.log('orientation:', playerColor)
         return (
             <Fragment>
                 <Arsenal>
-                    {WeaponComponents.map((WeaponComponent, index) => {
+                    {weaponCollection.map((weaponObj, index) => {
+                        let WeaponComponent = MapWeaponCardsToClass[weaponObj.weaponType]
                         return <WeaponComponent square={squareClicked} game={this.game} color={playerColor}
-                                                updateBoardFen={this.updateBoardFEN} key={index}/>
+                                                updateBoardFen={this.updateBoardFEN} key={index} options={weaponObj.options}
+                                                turn={this.game.turn()}/>
                     })}
                 </Arsenal>
                 {this.props.children({
@@ -144,9 +146,10 @@ class HumanVsRandomBase extends Component {
                     onSquareClick: this.onSquareClick,
                     squareStyles
                 })}
-                {shouldShowInfo && <Arsenal>
-                    {shouldShowInfo}
-                </Arsenal>}
+                 <Arsenal>
+                    <div> {shouldShowInfo} </div>
+                    <div> it is {this.game.turn()} turn </div>
+                </Arsenal>
             </Fragment>)
     }
 }
