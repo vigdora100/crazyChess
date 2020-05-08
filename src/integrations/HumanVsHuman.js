@@ -35,7 +35,8 @@ class HumanVsRandomBase extends Component {
             gameInDB: '',
             playerColor: '',
             shouldShowInfo: '',
-            squareClicked: ''
+            squareClicked: '',
+            lastMove:''
         };
         this.game = new Chess();
     }
@@ -74,7 +75,7 @@ class HumanVsRandomBase extends Component {
         // illegal move
         if (move === null) return;
 
-        this.setState({fen: this.game.fen()});
+        this.setState({fen: this.game.fen(), lastMove: move});
         let game = {fen: this.game.fen(), p1_token: gameInDB.p1_token, p2_token: gameInDB.p2_token}
         games(dataBaseId).set(game)
     };
@@ -122,7 +123,7 @@ class HumanVsRandomBase extends Component {
     };
 
     render() {
-        const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked} = this.state;
+        const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked, lastMove} = this.state;
         const {weaponCollection} = this.props;
         let WeaponComponents = []
         /* forEach(weaponCollection, (weaponObj) => {
@@ -136,7 +137,7 @@ class HumanVsRandomBase extends Component {
                         let WeaponComponent = MapWeaponCardsToClass[weaponObj.weaponType]
                         return <WeaponComponent square={squareClicked} game={this.game} color={playerColor}
                                                 updateBoardFen={this.updateBoardFEN} key={index} options={weaponObj.options}
-                                                turn={this.game.turn()}/>
+                                                turn={this.game.turn()} lastMove={lastMove} turns={3}/>
                     })}
                 </Arsenal>
                 {this.props.children({

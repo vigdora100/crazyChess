@@ -23,14 +23,17 @@ const PiecesWrapper = styled.div`
 class addPiece extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { popoverOpen: false, weaponChosen: false, turns: props.turns, piece: props.piece};
+        this.state = { popoverOpen: false, weaponChosen: false, turns: props.turns, 
+            piece: props.piece}
+        this.lastSquare =  ''  
     }
 
 
 
 
     onUseWeapon = () => {
-        const { game, square, color, updateBoardFen, removeWeapon, options:{pieceType: pieceType} } = this.props
+        const { game, square, color, updateBoardFen,
+             options:{pieceType: pieceType} } = this.props
         let isTherePiece = game.get(square)
         if (game.turn() === color) {
             if (!isTherePiece) {
@@ -39,9 +42,16 @@ class addPiece extends React.Component {
                 game.load(game.fen()) //we need to load the game from scretch since we can't remove
                 //an already moved piece - it is not enough removing
                 updateBoardFen(game.fen());
-                removeWeapon("ADD_PIECE")
+                this.lastSquare = square;
             }
         }
+    }
+
+    removePiece =(square) =>{
+        let {game, updateBoardFen} = this.props
+        game.remove(square)
+        game.load(game.fen()) 
+        updateBoardFen(game.fen())
     }
 
 
@@ -50,22 +60,39 @@ class addPiece extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        const { weaponChosen } = this.state
+        const { weaponChosen, turns } = this.state
         if (this.props.square !== prevProps.square) {
             if(weaponChosen){
                 this.onUseWeapon()
             }
         }
+        let lastMove = this.props.lastMove
+        if(lastMove && lastMove !== prevProps.lastMove && weaponChosen){
+                const { turns } = this.state
+                if(turns > 0){
+                    let updatedTurnNumber = turns-1;
+                    console.log('updatedTurnNumber :' , updatedTurnNumber)
+                    this.setState({turns: updatedTurnNumber})
+                    if(lastMove.from === this.lastSquare){
+                            this.lastSquare = lastMove.to;
+                    }
+                }
+                if(turns==0){
+                    this.props.removeWeapon("ADD_PIECE")
+                    this.removePiece(this.lastSquare)
+                }
+        }
     }
 
     render() {
-        const { options:{pieceType}, color, turns } = this.props
-     
+        const { options:{pieceType}, color } = this.props
+        const { turns } = this.state     
 
         let typeAndColorPiece = color + pieceType.toUpperCase();
         return (
             <BonusCard onClick={this.clickOnWeapon}>
                 {defaultPieces[typeAndColorPiece]}
+                    <div>{turns}</div>
             </BonusCard>
         )
     }
