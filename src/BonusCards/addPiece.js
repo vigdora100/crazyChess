@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { removeWeapon } from './actions'
 import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 
 
 const BonusCard = styled.button`
@@ -23,77 +23,88 @@ const PiecesWrapper = styled.div`
 class addPiece extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { popoverOpen: false, weaponChosen: false, turns: props.turns, 
-            piece: props.piece}
-        this.lastSquare =  ''  
+        this.state = {
+            weaponDeployed: false,
+            turns: props.turns,
+            piece: props.piece,
+            weaponFired: false,
+            weaponRemoved: false
+        }
+        this.currentWeaponSquare = ''
     }
-
-
 
 
     onUseWeapon = () => {
         const { game, square, color, updateBoardFen,
-             options:{pieceType: pieceType} } = this.props
+            options: { pieceType: pieceType } } = this.props
         let isTherePiece = game.get(square)
-        if (game.turn() === color) {
+        if (game.turn() === color) { //TODO: validate user turn
             if (!isTherePiece) {
                 let piece = { type: pieceType, color: color }
                 game.put(piece, square)
                 game.load(game.fen()) //we need to load the game from scretch since we can't remove
                 //an already moved piece - it is not enough removing
                 updateBoardFen(game.fen());
-                this.lastSquare = square;
+                this.currentWeaponSquare = square;
+                this.setState({ weaponFired: true })
             }
         }
     }
 
-    removePiece =(square) =>{
-        let {game, updateBoardFen} = this.props
+    removePiece = (square) => {
+        let { game, updateBoardFen } = this.props
         game.remove(square)
-        game.load(game.fen()) 
+        game.load(game.fen())
         updateBoardFen(game.fen())
     }
 
 
     clickOnWeapon = (piece) => {
-        this.setState({ weaponChosen: true})
+        const { clearSqaureClicked } = this.props
+        this.setState({ weaponDeployed: true })
+        clearSqaureClicked();   // need to clear to prevent collision with square clicking for moving pieces
     }
 
     componentDidUpdate(prevProps) {
-        const { weaponChosen, turns } = this.state
-        if (this.props.square !== prevProps.square) {
-            if(weaponChosen){
-                this.onUseWeapon()
+        const { weaponDeployed, weaponRemoved, weaponFired } = this.state
+        if (weaponDeployed) {
+            if (!weaponRemoved && !weaponFired) {
+                if (this.props.square !== prevProps.square) {
+                    this.onUseWeapon()
+                }
             }
-        }
-        let lastMove = this.props.lastMove
-        if(lastMove && lastMove !== prevProps.lastMove && weaponChosen){
+            let lastMove = this.props.lastMove
+            //weapon deployed and some move was played
+            if (lastMove && !isEqual(lastMove, prevProps.lastMove)) {
                 const { turns } = this.state
-                if(turns > 0){
-                    let updatedTurnNumber = turns-1;
-                    console.log('updatedTurnNumber :' , updatedTurnNumber)
-                    this.setState({turns: updatedTurnNumber})
-                    if(lastMove.from === this.lastSquare){
-                            this.lastSquare = lastMove.to;
+                if (turns > 0) {
+                    this.setState(({ turns }) => ({ turns: turns - 1 }))
+                    if (lastMove.from === this.currentWeaponSquare) { //the weapon moved
+                        this.currentWeaponSquare = lastMove.to;
                     }
                 }
-                if(turns==0){
-                    this.props.removeWeapon("ADD_PIECE")
-                    this.removePiece(this.lastSquare)
+                //if piece was taken by openent
+                if (this.props.color != lastMove.color && lastMove.to === this.currentWeaponSquare) {
+                    this.setState({ weaponRemoved: true });
+                }//if weapon duration ended
+                else if (!weaponRemoved && turns == 0) {
+                    this.removePiece(this.currentWeaponSquare)
+                    this.setState({ weaponRemoved: true });
                 }
+            }
         }
     }
 
     render() {
-        const { options:{pieceType}, color } = this.props
-        const { turns } = this.state     
+        const { options: { pieceType }, color } = this.props
+        const { turns, weaponFired, weaponRemoved } = this.state
 
         let typeAndColorPiece = color + pieceType.toUpperCase();
         return (
-            <BonusCard onClick={this.clickOnWeapon}>
+            !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
                 {defaultPieces[typeAndColorPiece]}
-                    <div>{turns}</div>
-            </BonusCard>
+                <div>{turns}</div>
+            </BonusCard> : null
         )
     }
 }

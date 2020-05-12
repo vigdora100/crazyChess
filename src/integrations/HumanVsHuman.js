@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Chess from 'chess.js';
 import {MapWeaponCardsToClass} from '../BonusCards/MapWeaponCardsToClass'
 import {connect} from 'react-redux'
-import {forEach} from 'lodash'
 import Arsenal from '../components/arsenal'
 import styled from 'styled-components'
 import {get} from 'lodash'
@@ -30,7 +29,6 @@ class HumanVsRandomBase extends Component {
         this.state = {
             fen: 'start',
             squareStyles: {},
-            pieceSquare: '',
             dataBaseId: '',
             gameInDB: '',
             playerColor: '',
@@ -38,35 +36,35 @@ class HumanVsRandomBase extends Component {
             squareClicked: '',
             lastMove:''
         };
-        this.game = new Chess();
+        this.gameEngine = new Chess();
     }
 
     async componentDidMount() {
         let token = get(this, 'props.match.params.token')
-        const newGame = {
-            p1_token: Utils.token(),
-            p2_token: Utils.token(),
-            fen: STARTING_FEN
-        };
-        const game = firebase.database().ref("games").push();
-        await game.set(newGame)
-        this.updateInfo(newGame.p2_token)
-        token = token || newGame.p1_token;
+        if(!token){ //user created new game
+            const newGameSetUp = {
+                p1_token: Utils.token(),
+                p2_token: Utils.token(),
+                fen: STARTING_FEN,
+            };
+            const DB = firebase.database().ref("games").push();
+            await DB.set(newGameSetUp)
+            token = newGameSetUp.p1_token;
+            this.updateInfo(newGameSetUp.p2_token)
+        }
         listenForUpdates(token, (id, game) => {
-            this.setState({dataBaseId: id})
-            this.game.load(game.fen)
-            this.updateBoard(id, game, token)
+            this.gameEngine.load(game.fen)
+            const playerColor = figurePlayer(token, game); //TODO: chose player color randomely
+            const lastMove = get(game, 'lastMove')
+            this.setState({gameInDB: game, playerColor: playerColor, fen: game.fen, dataBaseId: id, lastMove:lastMove})
         });
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
     }
 
     onDrop = ({sourceSquare, targetSquare}) => {
         // see if the move is legal
 
         const {dataBaseId, gameInDB, playerColor} = this.state
-        var move = (this.game.turn() === playerColor) && this.game.move({
+        var move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
             from: sourceSquare,
             to: targetSquare,
             promotion: 'q' // always promote to a queen for example simplicity
@@ -75,18 +73,12 @@ class HumanVsRandomBase extends Component {
         // illegal move
         if (move === null) return;
 
-        this.setState({fen: this.game.fen(), lastMove: move});
-        let game = {fen: this.game.fen(), p1_token: gameInDB.p1_token, p2_token: gameInDB.p2_token}
+        this.setState({fen: this.gameEngine.fen(), lastMove: move});
+        let game = {fen: this.gameEngine.fen(), p1_token: gameInDB.p1_token, p2_token: gameInDB.p2_token, lastMove:move}
         games(dataBaseId).set(game)
     };
 
-    updateBoard = (id, game, token) => {
-        const playerColor = figurePlayer(token, game);
-        game.fen && this.setState({fen: game.fen});
-        this.setState({gameInDB: game, playerColor: playerColor})
-    }
-
-    updateBoardFEN = (FEN) => {
+        updateBoardFEN = (FEN) => {
         this.setState({fen: FEN})
     }
 
@@ -94,50 +86,53 @@ class HumanVsRandomBase extends Component {
         this.setState({shouldShowInfo: token})
     }
 
+    clearSqaureClicked = () => {
+            this.setState({squareClicked: ''})
+
+    }
+
 
     onSquareClick = square => {
-        const {currentWeapon} = this.props;
-        const {playerColor} = this.state;
-        this.setState({squareClicked: square})
+        const {playerColor, gameInDB, dataBaseId} = this.state;
 
         this.setState({
             squareStyles: {[square]: {backgroundColor: 'DarkTurquoise'}},
-            pieceSquare: square
+            squareClicked: square
         });
 
-        if (currentWeapon) {
-            //do nothing, square click is weapon related
-        } else {
-            let move = (this.game.turn() === playerColor) && this.game.move({
-                from: this.state.pieceSquare,
-                to: square,
-                promotion: 'q' // always promote to a queen for example simplicity
-            });
+        let move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
+            from: this.state.squareClicked,
+            to: square,
+            promotion: 'q' // always promote to a queen for example simplicity
+        });
 
-
-            // illegal move
-            if (move === null) return;
-            this.setState({fen: this.game.fen()});
-            //window.setTimeout(this.makeRandomMove, 1000); //TODO: apply the click option
-        }
-    };
+        // illegal move
+        if (move === null) return;
+        this.setState({fen: this.gameEngine.fen(), lastMove: move});
+        let game = {fen: this.gameEngine.fen(), p1_token: gameInDB.p1_token, p2_token: gameInDB.p2_token, lastMove: move}
+        games(dataBaseId).set(game)
+    }
 
     render() {
         const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked, lastMove} = this.state;
         const {weaponCollection} = this.props;
         let WeaponComponents = []
-        /* forEach(weaponCollection, (weaponObj) => {
-            MapWeaponCardsToClass[weaponObj.weaponType] && WeaponComponents.push(MapWeaponCardsToClass[weapon]);
-        }) */
         console.log('orientation:', playerColor)
         return (
             <Fragment>
                 <Arsenal>
                     {weaponCollection.map((weaponObj, index) => {
                         let WeaponComponent = MapWeaponCardsToClass[weaponObj.weaponType]
-                        return <WeaponComponent square={squareClicked} game={this.game} color={playerColor}
-                                                updateBoardFen={this.updateBoardFEN} key={index} options={weaponObj.options}
-                                                turn={this.game.turn()} lastMove={lastMove} turns={3}/>
+                        return <WeaponComponent square={squareClicked}
+                                                game={this.gameEngine} 
+                                                color={playerColor}
+                                                updateBoardFen={this.updateBoardFEN} 
+                                                key={index} 
+                                                options={weaponObj.options}
+                                                turn={this.gameEngine.turn()} 
+                                                lastMove={lastMove} 
+                                                turns={3}
+                                                clearSqaureClicked={this.clearSqaureClicked}/>
                     })}
                 </Arsenal>
                 {this.props.children({
@@ -149,7 +144,7 @@ class HumanVsRandomBase extends Component {
                 })}
                  <Arsenal>
                     <div> {shouldShowInfo} </div>
-                    <div> it is {this.game.turn()} turn </div>
+                    <div> it is {this.gameEngine.turn()} turn </div>
                 </Arsenal>
             </Fragment>)
     }
@@ -160,24 +155,6 @@ let mapStateToProps = (state) => {
         currentWeapon: state.currentWeapon,
         weaponCollection: state.weaponCollection
     }
-}
-
-
-const HumanVsHumanInit = () => {
-    const newGame = {
-        p1_token: Utils.token(),
-        p2_token: Utils.token()
-    };
-
-    const game = firebase.database().ref("games").push();
-
-    game.set(newGame)
-        .then(() => {
-            return <HumanVsHuman token={newGame.p1_token}/>
-        }, (err) => {
-            throw err;
-        });
-
 }
 
 
@@ -209,7 +186,6 @@ function figurePlayer(token, {p1_token, p2_token}) {
         return 0;
     }
 }
-
 
 const parse = (tree) => {
     if (!tree) return [];
