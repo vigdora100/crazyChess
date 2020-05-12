@@ -60,6 +60,20 @@ class HumanVsRandomBase extends Component {
         });
     }
 
+
+    changeTurn = (fen, lastMove, CurrentColor) => {
+        const {dataBaseId, gameInDB} = this.state
+        let tokens = this.gameEngine.fen().split(' ');
+        tokens[1] = CurrentColor =='w' ? 'b' : 'w'
+        let newFen = tokens.join(' ')
+        this.gameEngine.load(newFen);
+        this.setState({fen: newFen})
+        let game = {fen: newFen, p1_token: gameInDB.p1_token, p2_token: gameInDB.p2_token, lastMove: lastMove}
+        games(dataBaseId).set(game)
+    }
+    
+    
+
     onDrop = ({sourceSquare, targetSquare}) => {
         // see if the move is legal
 
@@ -132,7 +146,9 @@ class HumanVsRandomBase extends Component {
                                                 turn={this.gameEngine.turn()} 
                                                 lastMove={lastMove} 
                                                 turns={3}
-                                                clearSqaureClicked={this.clearSqaureClicked}/>
+                                                clearSqaureClicked={this.clearSqaureClicked}
+                                                changeTurn = {this.changeTurn}
+                                                />
                     })}
                 </Arsenal>
                 {this.props.children({
@@ -152,7 +168,6 @@ class HumanVsRandomBase extends Component {
 
 let mapStateToProps = (state) => {
     return {
-        currentWeapon: state.currentWeapon,
         weaponCollection: state.weaponCollection
     }
 }

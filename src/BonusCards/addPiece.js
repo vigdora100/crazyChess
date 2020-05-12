@@ -36,23 +36,22 @@ class addPiece extends React.Component {
 
     onUseWeapon = () => {
         const { game, square, color, updateBoardFen,
-            options: { pieceType: pieceType } } = this.props
+            options: { pieceType: pieceType }, changeTurn } = this.props
         let isTherePiece = game.get(square)
         if (game.turn() === color) { //TODO: validate user turn
             if (!isTherePiece) {
                 let piece = { type: pieceType, color: color }
                 game.put(piece, square)
-                game.load(game.fen()) //we need to load the game from scretch since we can't remove
-                //an already moved piece - it is not enough removing
-                updateBoardFen(game.fen());
                 this.currentWeaponSquare = square;
                 this.setState({ weaponFired: true })
+                let lastMove = { to: square, type: pieceType, moveType: 'weapon', color:color }
+                changeTurn(game.fen(),lastMove, color)
             }
         }
     }
 
     removePiece = (square) => {
-        let { game, updateBoardFen } = this.props
+        let { game, updateBoardFen, changeTurn } = this.props
         game.remove(square)
         game.load(game.fen())
         updateBoardFen(game.fen())
