@@ -35,7 +35,7 @@ class addPiece extends React.Component {
 
 
     onUseWeapon = () => {
-        const { game, square, color, updateBoardFen,
+        const { game, square, color,
             options: { pieceType: pieceType }, changeTurn } = this.props
         let isTherePiece = game.get(square)
         if (game.turn() === color) { //TODO: validate user turn
@@ -45,16 +45,19 @@ class addPiece extends React.Component {
                 this.currentWeaponSquare = square;
                 this.setState({ weaponFired: true })
                 let lastMove = { to: square, type: pieceType, moveType: 'weapon', color:color }
-                changeTurn(game.fen(),lastMove, color)
+                changeTurn('ADD_PIECE',lastMove, color)
             }
         }
     }
 
     removePiece = (square) => {
-        let { game, updateBoardFen, changeTurn } = this.props
+        let { game, updateBoardFen, color, playerNumber } = this.props
         game.remove(square)
         game.load(game.fen())
         updateBoardFen(game.fen())
+        let lastMove = { from: square, moveType: 'remove-weapon', color:color }
+        this.props.modifyWeaponsCollection('ADD_PIECE',{}, lastMove, game.fen(), playerNumber, 'REMOVE')
+
     }
 
 
@@ -66,9 +69,10 @@ class addPiece extends React.Component {
 
     componentDidUpdate(prevProps) {
         const { weaponDeployed, weaponRemoved, weaponFired } = this.state
+        const { square } = this.props
         if (weaponDeployed) {
             if (!weaponRemoved && !weaponFired) {
-                if (this.props.square !== prevProps.square) {
+                if (square && square !== prevProps.square) {
                     this.onUseWeapon()
                 }
             }
