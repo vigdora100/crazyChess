@@ -16,9 +16,16 @@ const PieceButton = styled.button`
 `
 
 const PiecesWrapper = styled.div`
-      border-color: black
+      border-color: red
 
 `
+const downGradingMap = {
+    'b' : 'p',
+    'n': 'p',
+    'r': Math.random() > 0.5 ? 'n' : 'b',
+    'q': 'r',
+    'k': 'k'
+}
 
 class addPiece extends React.Component {
     constructor(props) {
@@ -35,28 +42,29 @@ class addPiece extends React.Component {
 
 
     onUseWeapon = () => {
-        const { game, square, color,
-            options: { pieceType: pieceType }, changeTurn } = this.props
-        let isTherePiece = game.get(square)
-        if (game.turn() === color) { //TODO: validate user turn
-            if (!isTherePiece) {
-                let piece = { type: pieceType, color: color }
-                game.put(piece, square)
+        const { game, square, color, changeTurn } = this.props
+        let pieceInSquare = game.get(square)
+        if (game.turn() === color) { 
+            if (pieceInSquare && pieceInSquare.color != color ) {
+                let newPiece = { type : downGradingMap[pieceInSquare.type] , color: pieceInSquare.color } 
+                game.put(newPiece, square)
                 this.currentWeaponSquare = square;
+                this.originalPieceInSquare = pieceInSquare
                 this.setState({ weaponFired: true })
-                let lastMove = { to: square, type: pieceType, moveType: 'weapon', color:color }
-                changeTurn('ADD_PIECE',lastMove, color)
+                let lastMove = { to: square, moveType: 'weapon', color:color }
+                changeTurn('DOWNGRADE_PIECE',lastMove, color)
             }
         }
     }
 
-    removePiece = (square) => {
-        let { game, updateBoardFen, color, playerNumber } = this.props
-        game.remove(square)
+    upgradePiece = (square) => {
+        const {color, game, updateBoardFen, playerNumber } = this.props
+        let lastMove = { from: square, moveType: 'remove-weapon', color:color }
+        game.put(this.originalPieceInSquare,square)
         game.load(game.fen())
         updateBoardFen(game.fen())
-        let lastMove = { from: square, moveType: 'remove-weapon', color:color }
-        this.props.modifyWeaponsCollection('ADD_PIECE',{}, lastMove, game.fen(), playerNumber, 'REMOVE')
+        this.props.modifyWeaponsCollection('DOWNGRADE_PIECE',{}, lastMove, game.fen(),playerNumber, 'REMOVE' )
+        
     }
 
 
@@ -68,29 +76,28 @@ class addPiece extends React.Component {
 
     componentDidUpdate(prevProps) {
         const { weaponDeployed, weaponRemoved, weaponFired } = this.state
-        const { square } = this.props
+        const { lastMove, square } = this.props
         if (weaponDeployed) {
             if (!weaponRemoved && !weaponFired) {
                 if (square && square !== prevProps.square) {
                     this.onUseWeapon()
                 }
             }
-            let lastMove = this.props.lastMove
             //weapon deployed and some move was played
             if (lastMove && !isEqual(lastMove, prevProps.lastMove)) {
                 const { turns } = this.state
+                if (lastMove.from === this.currentWeaponSquare) { //the weapon moved
+                    this.currentWeaponSquare = lastMove.to;
+                }
                 if (turns > 0) {
                     this.setState(({ turns }) => ({ turns: turns - 1 }))
-                    if (lastMove.from === this.currentWeaponSquare) { //the weapon moved
-                        this.currentWeaponSquare = lastMove.to;
-                    }
                 }
-                //if piece was taken by openent
-                if (this.props.color != lastMove.color && lastMove.to === this.currentWeaponSquare) {
+                 //if piece was taken by myself
+                if (this.props.color == lastMove.color && lastMove.to == this.currentWeaponSquare && lastMove.moveType != 'weapon') {
                     this.setState({ weaponRemoved: true });
-                }//if weapon duration ended
+                }
                 else if (!weaponRemoved && turns == 0) {
-                    this.removePiece(this.currentWeaponSquare)
+                    this.upgradePiece(this.currentWeaponSquare) //TODO: add weapon or piece
                     this.setState({ weaponRemoved: true });
                 }
             }
@@ -98,14 +105,13 @@ class addPiece extends React.Component {
     }
 
     render() {
-        const { options: { pieceType }, color } = this.props
+        const { color } = this.props
         const { turns, weaponFired, weaponRemoved } = this.state
 
-        let typeAndColorPiece = color + pieceType.toUpperCase();
-        return (
+        return ( //TODO: make it show it is remove weapon
             !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
-                {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>
+                <div> downGrade </div>
             </BonusCard> : null
         )
     }

@@ -50,7 +50,7 @@ class addPiece extends React.Component {
     }
 
     addPiece = (square) => {
-        const {color, options: { pieceType: pieceType }, game, updateBoardFen, playerWeaponsCollection, playerNumber } = this.props
+        const {color, options: { pieceType: pieceType }, game, updateBoardFen, playerNumber } = this.props
         console.log('adding piece back')
         let opponentColor = color == 'w' ? 'b' : 'w';
         let opponentPlayerNumber = playerNumber == 'p1' ? 'p2' : 'p1';
@@ -62,7 +62,6 @@ class addPiece extends React.Component {
             game.load(game.fen())
             updateBoardFen(game.fen())
         }else{
-            playerWeaponsCollection.push({})
             let weaponToAdd = {weaponType: 'ADD_PIECE', options: {pieceType: opponentColor}};
             this.props.modifyWeaponsCollection('REMOVE_PIECE',weaponToAdd, lastMove, game.fen(),opponentPlayerNumber, 'ADD' )
         }
