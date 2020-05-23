@@ -2,7 +2,11 @@ import { clone } from 'lodash'
 
 
 let initialState = {currentWeapon: {name: "", option: ""},
- weaponCollection: [{weaponType: 'DOWNGRADE_PIECE'},{weaponType: 'REMOVE_PIECE', options: {pieceType: 'b'}},{weaponType:'ADD_PIECE',options: {pieceType: 'b'}}]};
+ weaponCollection: [{weaponType: 'DOWNGRADE_PIECE'},
+ {weaponType: 'REMOVE_PIECE', options: {pieceType: 'b'}},
+ {weaponType:'ADD_PIECE',options: {pieceType: 'b'}},
+ {weaponType:'UPGRADE_PIECE'}
+]};
 
 
 const BonusCardsReducer = (state = initialState, action) => {

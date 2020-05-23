@@ -80,8 +80,9 @@ class HumanVsRandomBase extends Component {
         const { playerNumber }  = this.props
         let tokens = this.gameEngine.fen().split(' ');
         tokens[1] = CurrentPlayerColor =='w' ? 'b' : 'w'
+        tokens[3] = '-'
         let newFen = tokens.join(' ')
-        this.gameEngine.load(newFen);
+        let loadResult = this.gameEngine.load(newFen);
             this.setState({fen: newFen})
             let playerWeapons = this.getPlayerWeapons();
             playerWeapons.forEach((weapon)=>{
@@ -197,6 +198,7 @@ class HumanVsRandomBase extends Component {
     render() {
         const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked, lastMove, gameStatus, playerNumber} = this.state;
         const weapons = this.getPlayerWeapons()
+        const turn = this.gameEngine.turn();
         const gameOverMsg = (gameStatus && gameStatus['gameOver'] == playerNumber && gameStatus ) ?   'gameOver' : 'keepPlaying'
         return (
             <Fragment>
@@ -209,7 +211,7 @@ class HumanVsRandomBase extends Component {
                                                 updateBoardFen={this.updateBoardFEN} 
                                                 key={index} 
                                                 options={weaponObj.options}
-                                                turn={this.gameEngine.turn()} 
+                                                turn={turn} 
                                                 lastMove={lastMove} 
                                                 turns={3}
                                                 playerNumber={playerNumber}
@@ -230,7 +232,7 @@ class HumanVsRandomBase extends Component {
                  <Arsenal>
                     <div> {shouldShowInfo} </div>
                     <div> {gameOverMsg } </div>
-                    <div> it is {this.gameEngine.turn()} turn </div>
+                    <div> it is {turn} turn </div>
                 </Arsenal>
             </Fragment>)
     }

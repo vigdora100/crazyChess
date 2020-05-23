@@ -27,7 +27,7 @@ const downGradingMap = {
     'k': 'k'
 }
 
-class addPiece extends React.Component {
+class downGradePiece extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -124,4 +124,4 @@ const mapDispatchToProps = {
 }
 
 
-export default connect(null, mapDispatchToProps)(addPiece)
+export default connect(null, mapDispatchToProps)(downGradePiece)
