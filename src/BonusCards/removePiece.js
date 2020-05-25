@@ -5,11 +5,16 @@ import { removeWeapon } from './actions'
 import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
 import { get, isEqual } from 'lodash';
+import RemoveSign from '../Chessboard/svg/weapons/remove.svg';
+import { oppositeColor } from '../Chessboard/helpers'
+
 
 
 const BonusCard = styled.button`
     width:100px;
     height: 50px;
+    display: flex;
+    align-items: center;
 `
 
 const PieceButton = styled.button`
@@ -100,13 +105,12 @@ class removePiece extends React.Component {
     render() {
         const { options: { pieceType }, color } = this.props
         const { turns, weaponFired, weaponRemoved } = this.state
-
-        let typeAndColorPiece = color + pieceType.toUpperCase();
+        let typeAndColorPiece = oppositeColor(color) + pieceType.toUpperCase();
         return ( //TODO: make it show it is remove weapon
             !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
+                <img src={`/${RemoveSign}`}/> 
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>
-                <div> remove </div>
             </BonusCard> : null
         )
     }

@@ -6,8 +6,12 @@ const ArsenalWrapper = styled.div`
        width: 300px;
        border-style: dashed;
        margin-right: 30px;
+       margin-left: 30px;
+`
 
-     
+const WeaponsWrapper = styled.div`
+    flex-wrap: wrap;
+    display: flex;
 `
 
 const Title = styled.h3`
@@ -21,7 +25,9 @@ const Arsenal = (props) => {
                 <Title>
                     Arsenal
                 </Title>
-            {props.children}
+                <WeaponsWrapper>
+                    {props.children}
+                </WeaponsWrapper>
             </ArsenalWrapper>
         )
 }

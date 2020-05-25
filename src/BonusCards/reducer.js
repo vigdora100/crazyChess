@@ -5,6 +5,9 @@ let initialState = {currentWeapon: {name: "", option: ""},
  weaponCollection: [{weaponType: 'DOWNGRADE_PIECE'},
  {weaponType: 'REMOVE_PIECE', options: {pieceType: 'b'}},
  {weaponType:'ADD_PIECE',options: {pieceType: 'b'}},
+ {weaponType:'ADD_PIECE',options: {pieceType: 'r'}},
+ {weaponType:'ADD_PIECE',options: {pieceType: 'q'}},
+ {weaponType: 'REMOVE_PIECE', options: {pieceType: 'p'}},
  {weaponType:'UPGRADE_PIECE'}
 ]};
 

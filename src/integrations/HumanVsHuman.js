@@ -4,17 +4,20 @@ import Chess from 'chess.js';
 import {MapWeaponCardsToClass} from '../BonusCards/MapWeaponCardsToClass'
 import {connect} from 'react-redux'
 import Arsenal from '../components/arsenal'
+import InfoBoard from '../components/infoBoard'
 import styled from 'styled-components'
 import {get, findIndex, isEmpty} from 'lodash'
 import {withRouter} from 'react-router'
+import swal from 'sweetalert';
+
 
 
 const GameWrapper = styled.div`
     display:flex;
     align-items: center;
 `
-const STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-//const STARTING_FEN = "rnbqkbnr/1ppppppp/8/8/p1B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4"
+//const STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+const STARTING_FEN = "rnbqkbnr/1ppppppp/8/8/p1B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 4"
 const {firebase} = window;
 
 
@@ -135,7 +138,6 @@ class HumanVsRandomBase extends Component {
 
     onDrop = ({sourceSquare, targetSquare}) => {
         // see if the move is legal
-
         const {dataBaseId, playerColor, playerNumber, gameInDB} = this.state
         var move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
             from: sourceSquare,
@@ -151,6 +153,7 @@ class HumanVsRandomBase extends Component {
         if (this.gameEngine.game_over() === true ||this.gameEngine.in_draw() === true ) {
             let oponentNumber = playerNumber == 'p1' ? 'p2' : 'p1'
             game.gameStatus =  {'gameOver': oponentNumber}
+            swal("congratulation", "you won the game!", "success")
         }        
         games(dataBaseId).update(game)
     };
@@ -200,6 +203,7 @@ class HumanVsRandomBase extends Component {
         const weapons = this.getPlayerWeapons()
         const turn = this.gameEngine.turn();
         const gameOverMsg = (gameStatus && gameStatus['gameOver'] == playerNumber && gameStatus ) ?   'gameOver' : 'keepPlaying'
+        gameOverMsg == 'gameOver' && swal("too bad", "you lost the game!", "warning")
         return (
             <Fragment>
                 <Arsenal>
@@ -229,11 +233,11 @@ class HumanVsRandomBase extends Component {
                     onSquareClick: this.onSquareClick,
                     squareStyles
                 })}
-                 <Arsenal>
+                 <InfoBoard>
                     <div> {shouldShowInfo} </div>
                     <div> {gameOverMsg } </div>
                     <div> it is {turn} turn </div>
-                </Arsenal>
+                </InfoBoard>
             </Fragment>)
     }
 }

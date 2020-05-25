@@ -5,11 +5,16 @@ import { removeWeapon } from './actions'
 import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
 import { get, isEqual } from 'lodash';
+import PlusSign from '../Chessboard/svg/weapons/plus.svg';
+import SVG from 'react-inlinesvg';
+
 
 
 const BonusCard = styled.button`
+    display: flex;
     width:100px;
     height: 50px;
+    align-items: center;
 `
 
 const PieceButton = styled.button`
@@ -86,7 +91,7 @@ class addPiece extends React.Component {
                     }
                 }
                 //if piece was taken by openent
-                if (this.props.color != lastMove.color && lastMove.to === this.currentWeaponSquare) {
+                if (this.props.color != lastMove.color && lastMove.to === this.currentWeaponSquare && lastMove.moveType != 'weapon') {
                     this.setState({ weaponRemoved: true });
                 }//if weapon duration ended
                 else if (!weaponRemoved && turns == 0) {
@@ -104,8 +109,10 @@ class addPiece extends React.Component {
         let typeAndColorPiece = color + pieceType.toUpperCase();
         return (
             !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
+                <img src={`/${PlusSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>
+                
             </BonusCard> : null
         )
     }

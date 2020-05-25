@@ -25,7 +25,7 @@ module.exports = {
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/,
         use: 'file-loader'
-      }
+      },
     ]
   },
   plugins: [new CleanWebpackPlugin(['dist'])]

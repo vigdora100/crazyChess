@@ -5,11 +5,14 @@ import { removeWeapon } from './actions'
 import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
 import { get, isEqual } from 'lodash';
-
+import downgradeSign from '../Chessboard/svg/weapons/downgrade.svg';
 
 const BonusCard = styled.button`
+    display: flex;
     width:100px;
     height: 50px;
+    align-items: center;
+    justify-content: center
 `
 
 const PieceButton = styled.button`
@@ -110,8 +113,8 @@ class downGradePiece extends React.Component {
 
         return ( //TODO: make it show it is remove weapon
             !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
+                <img src={`/${downgradeSign}`}></img>
                 <div>{turns}</div>
-                <div> downGrade </div>
             </BonusCard> : null
         )
     }

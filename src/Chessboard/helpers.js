@@ -183,3 +183,8 @@ export function objToFen(obj) {
 
   return fen;
 }
+
+
+export const oppositeColor= (color) => {
+    return color == 'w' ? 'b' : 'w'
+}
