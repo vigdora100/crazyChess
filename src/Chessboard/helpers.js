@@ -48,7 +48,7 @@ export function fenToObj(fen) {
       } else {
         // piece
         let square = COLUMNS[colIdx] + currentRow;
-        position[square] = fenToPieceCode(row[j]);
+        position[square] = {pieceCode: fenToPieceCode(row[j])}
         colIdx = colIdx + 1;
       }
     }

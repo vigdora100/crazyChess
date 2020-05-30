@@ -15,14 +15,17 @@ import {
 } from './helpers';
 import CustomDragLayer from './CustomDragLayer';
 import defaultPieces from './svg/chesspieces/standard';
+import weaponsPieces from './svg/chesspieces/weapons';
 import ErrorBoundary from './ErrorBoundary';
 
 const ChessboardContext = React.createContext();
 
-const getPositionObject = position => {
+const getPositionObject = (position, weaponsOnBoard) => {
+  console.log('weaponsOnBoard: ', weaponsOnBoard)
+  console.log('position: ', position)
   if (position === 'start')
     return fenToObj('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
-  if (validFen(position)) return fenToObj(position);
+  if (validFen(position)) return Object.assign(fenToObj(position),weaponsOnBoard);
   if (validPositionObject(position)) return position;
 
   return {};
@@ -204,14 +207,15 @@ class Chessboard extends Component {
     onSquareClick: () => {},
     onPieceClick: () => {},
     onSquareRightClick: () => {},
-    allowDrag: () => true
+    allowDrag: () => true,
+    weaponsOnBoard: {}
   };
 
   static Consumer = ChessboardContext.Consumer;
 
   state = {
-    previousPositionFromProps: getPositionObject(this.props.position),
-    currentPosition: getPositionObject(this.props.position),
+    previousPositionFromProps: getPositionObject(this.props.position, this.props.weaponsOnBoard),
+    currentPosition: getPositionObject(this.props.position, this.props.weaponsOnBoard),
     sourceSquare: '',
     targetSquare: '',
     sourcePiece: '',
@@ -222,6 +226,7 @@ class Chessboard extends Component {
     squareClicked: false,
     firstMove: false,
     pieces: { ...defaultPieces, ...this.props.pieces },
+    weaponsPieces: {...weaponsPieces},
     undoMove: this.props.undo
   };
 
@@ -242,10 +247,10 @@ class Chessboard extends Component {
   };
 
   componentDidUpdate(prevProps) {
-    const { position, transitionDuration, getPosition } = this.props;
+    const { position, transitionDuration, getPosition, weaponsOnBoard } = this.props;
     const { waitForTransition, undoMove } = this.state;
-    const positionFromProps = getPositionObject(position);
-    const previousPositionFromProps = getPositionObject(prevProps.position);
+    const positionFromProps = getPositionObject(position, weaponsOnBoard);
+    const previousPositionFromProps = getPositionObject(prevProps.position, prevProps.weaponsOnBoard);
 
     // Check if there is a new position coming from props or undo is called
     if (!isEqual(positionFromProps, previousPositionFromProps) || undoMove) {
@@ -277,14 +282,14 @@ class Chessboard extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    const { position, undo } = props;
+    const { position, undo, weaponsOnBoard } = props;
     const {
       currentPosition,
       previousPositionFromProps,
       manualDrop,
       squareClicked
     } = state;
-    let positionFromProps = getPositionObject(position);
+    let positionFromProps = getPositionObject(position, weaponsOnBoard);
 
     // If positionFromProps is a new position then execute, else return null
     if (
@@ -424,7 +429,8 @@ class Chessboard extends Component {
       manualDrop,
       screenWidth,
       screenHeight,
-      pieces
+      pieces,
+      weaponsPieces
     } = this.state;
 
     const getScreenDimensions = screenWidth && screenHeight;
@@ -435,6 +441,7 @@ class Chessboard extends Component {
           value={{
             ...this.props,
             pieces,
+            weaponsPieces,
             orientation: orientation.toLowerCase(),
             dropOffBoard: dropOffBoard.toLowerCase(),
             ...{
@@ -461,6 +468,8 @@ class Chessboard extends Component {
             {getScreenDimensions && sparePieces && <SparePieces.Bottom />}
           </div>
           <CustomDragLayer
+            weaponsPieces={weaponsPieces}
+            position={currentPosition}
             width={this.getWidth()}
             pieces={pieces}
             id={id}

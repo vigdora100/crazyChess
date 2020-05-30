@@ -4,9 +4,9 @@ import { clone } from 'lodash'
 let initialState = {currentWeapon: {name: "", option: ""},
  weaponCollection: [{weaponType: 'DOWNGRADE_PIECE'},
  {weaponType: 'REMOVE_PIECE', options: {pieceType: 'b'}},
- {weaponType:'ADD_PIECE',options: {pieceType: 'b'}},
- {weaponType:'ADD_PIECE',options: {pieceType: 'r'}},
- {weaponType:'ADD_PIECE',options: {pieceType: 'q'}},
+ {weaponType:'ADD_PIECE',options: {pieceType: 'b', duration: 3}},
+ {weaponType:'ADD_PIECE',options: {pieceType: 'r', duration: 3}},
+ {weaponType:'ADD_PIECE',options: {pieceType: 'q', duration: 3}},
  {weaponType: 'REMOVE_PIECE', options: {pieceType: 'p'}},
  {weaponType:'UPGRADE_PIECE'}
 ]};

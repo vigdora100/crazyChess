@@ -6,7 +6,7 @@ import {connect} from 'react-redux'
 import Arsenal from '../components/arsenal'
 import InfoBoard from '../components/infoBoard'
 import styled from 'styled-components'
-import {get, findIndex, isEmpty} from 'lodash'
+import {get, findIndex, filter, cloneDeep, forEach} from 'lodash'
 import {withRouter} from 'react-router'
 import swal from 'sweetalert';
 
@@ -38,7 +38,9 @@ class HumanVsRandomBase extends Component {
             playerColor: '',
             shouldShowInfo: '',
             squareClicked: '',
-            lastMove:''
+            lastMove:'',
+            weaponUsage: {weaponType: '', weaponStatus: '', options: '' },
+            weaponsOnBoard: {}, 
         };
         this.gameEngine = new Chess();
     }
@@ -54,7 +56,8 @@ class HumanVsRandomBase extends Component {
                 p1: {
                     weapons: weaponCollection
                 },
-                gameStatus: 'Playable'
+                gameStatus: 'Playable',
+                moveNumber: 1
             };
             const DB = firebase.database().ref("games").push();
             await DB.set(newGameSetUp)
@@ -73,11 +76,23 @@ class HumanVsRandomBase extends Component {
                         dataBaseId: id,
                         lastMove:lastMove,
                         playerNumber:playerNumber,
-                        gameStatus : get(game, 'gameStatus')
+                        gameStatus : get(game, 'gameStatus'),
+                        weaponsOnBoard: get(game, 'weaponsOnBoard'),
+                        moveNumber: get(game, 'moveNumber')
                         })
             });
     }
 
+
+    clickOnWeapon = (weaponType, options) => {
+        let weaponObject = { weaponType: weaponType, weaponStatus: 'deployed', options: options }
+        this.setState({weaponUsage: weaponObject})
+    }
+
+    onWeaponFired = () =>{
+        let weaponObject = { weaponType: '', weaponStatus: '', options: '' }
+        this.setState({weaponUsage: weaponObject})
+    }
 
     changeTurn = (weaponType, lastMove, CurrentPlayerColor) => {
         const { playerNumber }  = this.props
@@ -138,8 +153,11 @@ class HumanVsRandomBase extends Component {
 
     onDrop = ({sourceSquare, targetSquare}) => {
         // see if the move is legal
+        const { weaponUsage, weaponsOnBoard }  = this.state
+        console.log('fen here: ' ,this.gameEngine.fen())
+        if(get(weaponUsage, 'weaponStatus') != 'deployed'){
         const {dataBaseId, playerColor, playerNumber, gameInDB} = this.state
-        var move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
+        let move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
             from: sourceSquare,
             to: targetSquare,
             promotion: 'q' // always promote to a queen for example simplicity
@@ -147,16 +165,80 @@ class HumanVsRandomBase extends Component {
         
         // illegal move
         if (move === null) return;
-        
+
+        //update weapnse on Board
+        let weaponsOnBoardCopy;
+        if(weaponsOnBoard){
+            weaponsOnBoardCopy = cloneDeep(weaponsOnBoard)
+            if(weaponsOnBoard.hasOwnProperty(sourceSquare)){
+                weaponsOnBoardCopy[targetSquare] = weaponsOnBoardCopy[sourceSquare]
+                delete weaponsOnBoardCopy[sourceSquare]
+                weaponsOnBoardCopy[targetSquare].duration = weaponsOnBoardCopy[targetSquare].duration-1
+            }
+            for (const [square, weapon] of Object.entries(weaponsOnBoardCopy)) {
+                if (weapon.duration == 0){
+                delete weaponsOnBoardCopy[square]
+                this.gameEngine.remove(square)
+                this.gameEngine.load(this.gameEngine.fen())
+                }
+            }
+            if(weaponsOnBoard.hasOwnProperty(targetSquare)){
+                delete weaponsOnBoardCopy[targetSquare]
+                this.setState({weaponsOnBoard: weaponsOnBoardCopy})
+            }
+            this.setState({weaponsOnBoard: weaponsOnBoardCopy})
+        }
+        console.log('fen in drop:', this.gameEngine.fen())
+        let game = {fen: this.gameEngine.fen(), lastMove:move }
         this.setState({fen: this.gameEngine.fen(), lastMove: move});
-        let game = {fen: this.gameEngine.fen(), lastMove:move}
+        if(weaponsOnBoardCopy){  game.weaponsOnBoard = weaponsOnBoardCopy;}
         if (this.gameEngine.game_over() === true ||this.gameEngine.in_draw() === true ) {
             let oponentNumber = playerNumber == 'p1' ? 'p2' : 'p1'
             game.gameStatus =  {'gameOver': oponentNumber}
             swal("congratulation", "you won the game!", "success")
-        }        
+        }
+        game.moveNumber = gameInDB.moveNumber+1
+        console.log('turn: ', game.moveNumber)        
         games(dataBaseId).update(game)
+        }
     };
+
+    onSquareClick = square => {
+        const {playerColor, gameInDB, dataBaseId, weaponUsage} = this.state;
+
+        if(get(weaponUsage, 'weaponStatus') != 'deployed'){
+        this.setState({
+            squareStyles: {[square]: {backgroundColor: 'DarkTurquoise'}},
+            squareClicked: square
+        });
+
+        let move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
+            from: this.state.squareClicked,
+            to: square,
+            promotion: 'q' // always promote to a queen for example simplicity
+        });
+
+        // illegal move
+        if (move === null) return;
+        this.setState({fen: this.gameEngine.fen(), lastMove: move});
+        let game = {fen: this.gameEngine.fen(), lastMove: move}
+        games(dataBaseId).update(game);
+        }else{
+            //weapon act
+            const { pieceType, weaponType } = weaponUsage.options
+            let pieceCode = playerColor + pieceType.toUpperCase();
+            let game = {weaponsOnBoard: {[square]: {color: playerColor, ...weaponUsage.options, pieceCode: pieceCode, isWeapon: true }}}
+            let piece = { type: pieceType, color: playerColor }
+            this.gameEngine.put(piece, square)
+            let lastMove = { to: square, type: pieceType, moveType: 'weapon', color:playerColor }
+            this.changeTurn(weaponType, lastMove, playerColor);
+            game.moveNumber = gameInDB.moveNumber+1
+            console.log('turn: ', game.moveNumber)
+            this.onWeaponFired()
+            games(dataBaseId).update(game);
+        }
+    }
+
 
     updateBoardFEN = (FEN) => {
         this.setState({fen: FEN})
@@ -177,33 +259,15 @@ class HumanVsRandomBase extends Component {
     }
 
 
-    onSquareClick = square => {
-        const {playerColor, gameInDB, dataBaseId} = this.state;
-
-        this.setState({
-            squareStyles: {[square]: {backgroundColor: 'DarkTurquoise'}},
-            squareClicked: square
-        });
-
-        let move = (this.gameEngine.turn() === playerColor) && this.gameEngine.move({
-            from: this.state.squareClicked,
-            to: square,
-            promotion: 'q' // always promote to a queen for example simplicity
-        });
-
-        // illegal move
-        if (move === null) return;
-        this.setState({fen: this.gameEngine.fen(), lastMove: move});
-        let game = {fen: this.gameEngine.fen(), lastMove: move}
-        games(dataBaseId).update(game);
-    }
-
+ 
     render() {
-        const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked, lastMove, gameStatus, playerNumber} = this.state;
+        const {fen, squareStyles, playerColor, shouldShowInfo, squareClicked, lastMove, gameStatus, playerNumber, gameInDB,weaponsOnBoard} = this.state;
         const weapons = this.getPlayerWeapons()
         const turn = this.gameEngine.turn();
         const gameOverMsg = (gameStatus && gameStatus['gameOver'] == playerNumber && gameStatus ) ?   'gameOver' : 'keepPlaying'
         gameOverMsg == 'gameOver' && swal("too bad", "you lost the game!", "warning")
+        console.log('gameInDB:', gameInDB)
+        console.log('fen:', fen)
         return (
             <Fragment>
                 <Arsenal>
@@ -218,6 +282,7 @@ class HumanVsRandomBase extends Component {
                                                 turn={turn} 
                                                 lastMove={lastMove} 
                                                 turns={3}
+                                                clickOnWeapon={this.clickOnWeapon}
                                                 playerNumber={playerNumber}
                                                 clearSqaureClicked={this.clearSqaureClicked}
                                                 changeTurn = {this.changeTurn}
@@ -231,7 +296,8 @@ class HumanVsRandomBase extends Component {
                     position: fen,
                     onDrop: this.onDrop,
                     onSquareClick: this.onSquareClick,
-                    squareStyles
+                    squareStyles,
+                    weaponsOnBoard: weaponsOnBoard
                 })}
                  <InfoBoard>
                     <div> {shouldShowInfo} </div>
@@ -297,7 +363,7 @@ export default function PlayRandomMoveEngine(props) {
     return (
         <GameWrapper>
             <HumanVsRandom>
-                {({position, onDrop, onSquareClick, squareStyles, orientation}) => (
+                {({position, onDrop, onSquareClick, squareStyles, orientation, weaponsOnBoard}) => (
                     <Chessboard
                         orientation={orientation}
                         calcWidth={({screenWidth}) => (screenWidth < 500 ? 350 : 480)}
@@ -310,6 +376,7 @@ export default function PlayRandomMoveEngine(props) {
                         }}
                         onSquareClick={onSquareClick}
                         squareStyles={squareStyles}
+                        weaponsOnBoard={weaponsOnBoard}
                     />
                 )}
             </HumanVsRandom>

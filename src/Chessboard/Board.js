@@ -69,8 +69,10 @@ class Board extends Component {
                     {this.hasPiece(context.currentPosition, square) ? (
                       <Piece
                         pieces={context.pieces}
+                        weaponsPieces={context.weaponsPieces}
                         square={square}
-                        piece={context.currentPosition[square]}
+                        pieceData={context.currentPosition[square]}
+                        piece={context.currentPosition[square].pieceCode}
                         width={context.width}
                         setPosition={context.setPosition}
                         dropOffBoard={context.dropOffBoard}

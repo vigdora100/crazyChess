@@ -2,8 +2,16 @@ import React, { Component } from 'react';
 import { DragSource } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { get} from 'lodash'
+import  styled  from 'styled-components'
 
 import { ItemTypes } from './helpers';
+
+const Duration = styled.div`
+   position: absolute;
+   bottom: 3px;
+   right: 3px;
+`;
 
 /* eslint react/prop-types: 0 */
 export const renderChessPiece = ({
@@ -21,7 +29,9 @@ export const renderChessPiece = ({
   onPieceClick,
   allowDrag,
   customDragLayerStyles = {},
-  phantomPieceStyles = {}
+  phantomPieceStyles = {},
+  pieceData,
+  weaponsPieces,
 }) => {
   const renderChessPieceArgs = {
     squareWidth: width / 8,
@@ -30,11 +40,12 @@ export const renderChessPiece = ({
     targetSquare: dropTarget && dropTarget.target,
     sourceSquare: dropTarget && dropTarget.source
   };
-
+  console.log('pieceData: ' , pieceData)
+  let isWeapon = get(pieceData,'isWeapon');
   return (
     <div
       data-testid={`${piece}-${square}`}
-      onClick={() => onPieceClick(piece)}
+      onClick={() => onPiecCelick(piece)}
       style={{
         ...pieceStyles({
           isDragging,
@@ -56,9 +67,11 @@ export const renderChessPiece = ({
         pieces[piece](renderChessPieceArgs)
       ) : (
         <svg viewBox={`1 1 43 43`} width={width / 8} height={width / 8}>
-          <g>{pieces[piece]}</g>
+          <g>{isWeapon ?  weaponsPieces[piece] : pieces[piece] }
+          </g>
         </svg>
       )}
+      {isWeapon ? <Duration> {get(pieceData,'duration')}</Duration> : null }
     </div>
   );
 };
@@ -83,7 +96,9 @@ class Piece extends Component {
     setTouchState: PropTypes.func,
     onPieceClick: PropTypes.func,
     wasSquareClicked: PropTypes.func,
-    allowDrag: PropTypes.func
+    allowDrag: PropTypes.func,
+    pieceData: PropTypes.object,
+    weaponsPieces: PropTypes.object
   };
 
   shouldComponentUpdate(nextProps) {
@@ -130,7 +145,9 @@ class Piece extends Component {
       sourceSquare,
       dropTarget,
       onPieceClick,
-      allowDrag
+      allowDrag,
+      weaponsPieces,
+      pieceData
     } = this.props;
 
     return connectDragSource(
@@ -147,7 +164,9 @@ class Piece extends Component {
         sourceSquare,
         dropTarget,
         onPieceClick,
-        allowDrag
+        allowDrag,
+        weaponsPieces,
+        pieceData
       })
     );
   }
@@ -278,6 +297,7 @@ const pieceStyles = ({
     getSquareCoordinates
   }),
   transition: `transform ${transitionDuration}ms`,
+  position: 'relative',
   zIndex: 5,
   cursor: isDragging
     ? '-webkit-grabbing'

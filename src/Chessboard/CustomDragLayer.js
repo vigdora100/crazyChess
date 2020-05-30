@@ -28,13 +28,21 @@ class CustomDragLayer extends Component {
       currentOffset,
       wasPieceTouched,
       pieces,
-      sourceSquare
+      sourceSquare,
+      weaponsPieces,
+      position,
     } = this.props;
-
+    if(isDragging && item.board === id){
+      console.log('positionDrag: ', position)
+      console.log('item: ', item)
+      console.log('pieceDataHere:', position[item.source] )
+    }
     return isDragging && item.board === id ? (
       <div style={layerStyles}>
         <div style={getItemStyle(currentOffset, wasPieceTouched)}>
           {renderChessPiece({
+            pieceData : position[item.source],
+            weaponsPieces,
             width,
             pieces,
             piece: item.piece,

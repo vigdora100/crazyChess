@@ -103,12 +103,12 @@ class addPiece extends React.Component {
     }
 
     render() {
-        const { options: { pieceType }, color } = this.props
+        const { options , color, clickOnWeapon } = this.props
         const { turns, weaponFired, weaponRemoved } = this.state
 
-        let typeAndColorPiece = color + pieceType.toUpperCase();
+        let typeAndColorPiece = color + options.pieceType.toUpperCase();
         return (
-            !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
+            !weaponRemoved ? <BonusCard onClick={()=>clickOnWeapon('AddPiece', options)} disabled={weaponFired}>
                 <img src={`/${PlusSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>
