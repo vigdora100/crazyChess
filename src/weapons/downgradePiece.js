@@ -108,11 +108,11 @@ class downGradePiece extends React.Component {
     }
 
     render() {
-        const { color } = this.props
+        const { clickOnWeapon, options, key } = this.props
         const { turns, weaponFired, weaponRemoved } = this.state
 
         return ( //TODO: make it show it is remove weapon
-            !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
+            !weaponRemoved ? <BonusCard onClick={()=>clickOnWeapon('DowngradePiece',options, key)} disabled={weaponFired}>
                 <img src={`/${downgradeSign}`}></img>
                 <div>{turns}</div>
             </BonusCard> : null

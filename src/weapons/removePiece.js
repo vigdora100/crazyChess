@@ -103,14 +103,17 @@ class removePiece extends React.Component {
     }
 
     render() {
-        const { options: { pieceType }, color } = this.props
+        const { options, color, clickOnWeapon, key } = this.props
+        const { pieceType} = options;
         const { turns, weaponFired, weaponRemoved } = this.state
+
         let typeAndColorPiece = oppositeColor(color) + pieceType.toUpperCase();
-        return ( //TODO: make it show it is remove weapon
-            !weaponRemoved ? <BonusCard onClick={this.clickOnWeapon} disabled={weaponFired}>
-                <img src={`/${RemoveSign}`}/> 
+        return (
+            !weaponRemoved ? <BonusCard onClick={()=>clickOnWeapon('RemovePiece', options, key)} disabled={weaponFired}>
+                <img src={`/${RemoveSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>
+                
             </BonusCard> : null
         )
     }

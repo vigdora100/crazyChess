@@ -15,6 +15,8 @@ const BonusCard = styled.button`
     width:100px;
     height: 50px;
     align-items: center;
+    ${({buttonClicked})=> 
+        (buttonClicked && `background-color: #ABB5BF`)}
 `
 
 const PieceButton = styled.button`
@@ -103,12 +105,12 @@ class addPiece extends React.Component {
     }
 
     render() {
-        const { options , color, clickOnWeapon } = this.props
+        const { options , color, clickOnWeapon, index, buttonClicked } = this.props
         const { turns, weaponFired, weaponRemoved } = this.state
 
         let typeAndColorPiece = color + options.pieceType.toUpperCase();
         return (
-            !weaponRemoved ? <BonusCard onClick={()=>clickOnWeapon('AddPiece', options)} disabled={weaponFired}>
+            !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} onClick={()=>clickOnWeapon('AddPiece', options, index)} disabled={weaponFired}>
                 <img src={`/${PlusSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>

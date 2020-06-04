@@ -7,6 +7,7 @@ const ArsenalWrapper = styled.div`
        border-style: dashed;
        margin-right: 30px;
        margin-left: 30px;
+       position: relative;
 `
 
 const WeaponsWrapper = styled.div`

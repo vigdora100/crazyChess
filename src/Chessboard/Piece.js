@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { get} from 'lodash'
 import  styled  from 'styled-components'
+import weaponsLogic  from '../weapons/weaponsLogic'
 
 import { ItemTypes } from './helpers';
 
@@ -40,12 +41,13 @@ export const renderChessPiece = ({
     targetSquare: dropTarget && dropTarget.target,
     sourceSquare: dropTarget && dropTarget.source
   };
-  console.log('pieceData: ' , pieceData)
   let isWeapon = get(pieceData,'isWeapon');
+  let weaponImageCode = isWeapon && getWeaponImageCode(pieceData,weaponsLogic)
   return (
-    <div
+    !isWeapon || weaponImageCode ?
+    (<div
       data-testid={`${piece}-${square}`}
-      onClick={() => onPiecCelick(piece)}
+      onClick={() => onPieceClick(piece)}
       style={{
         ...pieceStyles({
           isDragging,
@@ -63,18 +65,19 @@ export const renderChessPiece = ({
         ...customDragLayerStyles
       }}
     >
-      {typeof pieces[piece] === 'function' ? (
-        pieces[piece](renderChessPieceArgs)
-      ) : (
         <svg viewBox={`1 1 43 43`} width={width / 8} height={width / 8}>
           <g>{isWeapon ?  weaponsPieces[piece] : pieces[piece] }
           </g>
         </svg>
-      )}
-      {isWeapon ? <Duration> {get(pieceData,'duration')}</Duration> : null }
-    </div>
+          {isWeapon ? <Duration> {get(pieceData,'duration')}</Duration> : null }
+          </div>) : <div></div>   
   );
 };
+
+const getWeaponImageCode = (pieceData, weaponsLogic) => {
+  let PieceWeaponLogic = pieceData.weaponType && weaponsLogic[pieceData.weaponType]
+  return PieceWeaponLogic && PieceWeaponLogic.weaponImageCode() ;
+}
 
 class Piece extends Component {
   static propTypes = {

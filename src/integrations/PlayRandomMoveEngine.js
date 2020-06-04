@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react'; // eslint-disable-line no-unused-vars
 import PropTypes from 'prop-types';
 import Chess from 'chess.js';
-import { MapWeaponCardsToClass } from '../BonusCards/MapWeaponCardsToClass'
+import { MapWeaponCardsToClass } from '../weapons/MapWeaponCardsToClass'
 import { connect } from 'react-redux'
 import { forEach } from 'lodash'
 import Arsenal  from '../components/arsenal'

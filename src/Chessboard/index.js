@@ -21,8 +21,6 @@ import ErrorBoundary from './ErrorBoundary';
 const ChessboardContext = React.createContext();
 
 const getPositionObject = (position, weaponsOnBoard) => {
-  console.log('weaponsOnBoard: ', weaponsOnBoard)
-  console.log('position: ', position)
   if (position === 'start')
     return fenToObj('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
   if (validFen(position)) return Object.assign(fenToObj(position),weaponsOnBoard);
