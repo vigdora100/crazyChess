@@ -6,7 +6,7 @@ import {connect} from 'react-redux'
 import Arsenal from '../components/arsenal'
 import InfoBoard from '../components/infoBoard'
 import styled from 'styled-components'
-import {get, findIndex, filter, cloneDeep, forEach} from 'lodash'
+import {get, isEmpty, cloneDeep} from 'lodash'
 import {withRouter} from 'react-router'
 import swal from 'sweetalert';
 import weaponsLogic  from '../weapons/weaponsLogic'
@@ -105,20 +105,20 @@ class HumanVsRandomBase extends Component {
         this.setState({weaponUsage: weaponObject})
     }
 
-    changeTurn = (weaponType, lastMove, CurrentPlayerColor,playerNumber) => {
+    changeTurn = (weaponType, lastMove, CurrentPlayerColor,playerNumber, index) => {
         let tokens = this.gameEngine.fen().split(' ');
         tokens[1] = CurrentPlayerColor =='w' ? 'b' : 'w'
         tokens[3] = '-'
         let newFen = tokens.join(' ')
-        let loadResult = this.gameEngine.load(newFen);
-            this.setState({fen: newFen})
-            let playerWeapons = this.getPlayerWeapons();
-            playerWeapons.forEach((weapon)=>{
-                if (weapon.weaponType == weaponType){
-                    weapon.deployed = true;
-                } 
-            })
-            this.modifyWeaponsCollection(weaponType,playerWeapons, lastMove, newFen, playerNumber,'REMOVE' )
+        this.gameEngine.load(newFen);
+        this.setState({fen: newFen})
+        let playerWeapons = this.getPlayerWeapons();
+        playerWeapons.forEach((weapon)=>{
+            if (weapon.weaponType == weaponType){
+                weapon.deployed = true;
+            } 
+        })
+        return this.modifyWeaponsCollection(weaponType,playerWeapons, lastMove, newFen, playerNumber,'REMOVE', index )
     }
 
     EngineChangeTurn = (targetPlayerColor) => { 
@@ -137,13 +137,11 @@ class HumanVsRandomBase extends Component {
         this.setState({fen: FEN})
     }
 
-    modifyWeaponsCollection = (weaponType, WeaponsNewObj, lastMove, newFen, playerNumber, actionType) =>{
-        const { dataBaseId } = this.state
+    modifyWeaponsCollection = (weaponType, WeaponsNewObj, lastMove, newFen, playerNumber, actionType, index) =>{
         let playerWeapons = this.getPlayerWeapons();
 
         switch(actionType){
             case 'REMOVE' : {
-            let index = findIndex(playerWeapons, (weapon)=>{return weapon.weaponType == weaponType })
             playerWeapons.splice(index, 1)
             break;
             }
@@ -159,8 +157,7 @@ class HumanVsRandomBase extends Component {
                 break;  
             }
         }
-        let game = {fen: newFen, lastMove: lastMove, [playerNumber]: { weapons: playerWeapons}}
-        games(dataBaseId).update(game)
+       return {fen: newFen, lastMove: lastMove, [playerNumber]: { weapons: playerWeapons}}
     }
     
     
@@ -177,15 +174,19 @@ class HumanVsRandomBase extends Component {
         });
         
         // illegal move
-        if (move === null) return;
+        if (move === null || move === false ) return;
 
         //update weapnse on Board
         let weaponsOnBoardCopy;
-        if(weaponsOnBoard){
+        if(!isEmpty(weaponsOnBoard)){
             weaponsOnBoardCopy = cloneDeep(weaponsOnBoard)
+          //if weapon was taken by another weapon or piece
+            if(weaponsOnBoard.hasOwnProperty(targetSquare)){
+                delete weaponsOnBoardCopy[targetSquare]
+            } 
             //weapon movement
             if(weaponsOnBoardCopy.hasOwnProperty(sourceSquare)){
-                weaponsLogic[weaponsOnBoardCopy[sourceSquare].weaponType].movementLogic(weaponsOnBoardCopy, targetSquare, sourceSquare)               
+                weaponsLogic[weaponsOnBoardCopy[sourceSquare].weaponType].movementLogic(weaponsOnBoardCopy, targetSquare, sourceSquare, this.gameEngine, this.updateBoardFEN)               
             }
             //apply when duration end logic on each weapon
             for (const [square, weapon] of Object.entries(weaponsOnBoardCopy)) {
@@ -195,14 +196,9 @@ class HumanVsRandomBase extends Component {
                         updateBoardFen: this.updateBoardFEN, modifyWeaponsCollection: this.modifyWeaponsCollection, playerNumber,playerColor})         
                 }
             }
-            if(weaponsOnBoard.hasOwnProperty(targetSquare)){
-                delete weaponsOnBoardCopy[targetSquare]
-                this.setState({weaponsOnBoard: weaponsOnBoardCopy})
-            }
-            this.setState({weaponsOnBoard: weaponsOnBoardCopy})
         }
         let game = {fen: this.gameEngine.fen(), lastMove:move }
-        this.setState({fen: this.gameEngine.fen(), lastMove: move});
+        this.setState({fen: this.gameEngine.fen(), lastMove: move, weaponsOnBoard: weaponsOnBoardCopy? weaponsOnBoardCopy : weaponsOnBoard });
         if(weaponsOnBoardCopy){  game.weaponsOnBoard = weaponsOnBoardCopy;}
         if (this.gameEngine.game_over() === true ||this.gameEngine.in_draw() === true ) {
             let oponentNumber = playerNumber == 'p1' ? 'p2' : 'p1'
@@ -234,7 +230,7 @@ class HumanVsRandomBase extends Component {
         this.setState({fen: this.gameEngine.fen(), lastMove: move});
         let game = {fen: this.gameEngine.fen(), lastMove: move}
         games(dataBaseId).update(game);
-        }else if(weaponsLogic[weaponType].validate({gameEngine: this.gameEngine, square, playerColor, weaponUsage})){
+        }else if(weaponsLogic[weaponType].validate({gameEngine: this.gameEngine, square, playerColor, weaponUsage, weaponsOnBoard})){
             //weapon act
             let updatedGame = weaponsLogic[weaponType].weaponFire({weaponUsage, playerColor,playerNumber, square,
                 gameEngine: this.gameEngine, gameInDB,changeTurn: this.changeTurn, weaponsOnBoard})

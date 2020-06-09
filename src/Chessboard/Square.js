@@ -93,7 +93,8 @@ class Square extends Component {
           style={{
             ...size(width),
             ...center,
-            ...(squareStyles[square] && squareStyles[square])
+            ...(squareStyles[square] && squareStyles[square]),
+            position: 'relative'
           }}
         >
           {roughSquare.length ? (

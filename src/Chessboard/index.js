@@ -5,6 +5,8 @@ import isEqual from 'lodash.isequal';
 import { DragDropContext } from 'react-dnd';
 import MultiBackend from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch';
+import styled from 'styled-components';
+import downgradeSign from '../Chessboard/svg/weapons/downgrade.svg';
 
 import SparePieces from './SparePieces';
 import {
@@ -19,6 +21,9 @@ import weaponsPieces from './svg/chesspieces/weapons';
 import ErrorBoundary from './ErrorBoundary';
 
 const ChessboardContext = React.createContext();
+
+const BoardWrapper = styled.div`
+`
 
 const getPositionObject = (position, weaponsOnBoard) => {
   if (position === 'start')
@@ -288,7 +293,6 @@ class Chessboard extends Component {
       squareClicked
     } = state;
     let positionFromProps = getPositionObject(position, weaponsOnBoard);
-
     // If positionFromProps is a new position then execute, else return null
     if (
       !isEqual(positionFromProps, previousPositionFromProps) &&
@@ -460,11 +464,11 @@ class Chessboard extends Component {
             }
           }}
         >
-          <div>
+          <BoardWrapper>
             {getScreenDimensions && sparePieces && <SparePieces.Top />}
             {getScreenDimensions && <Board />}
             {getScreenDimensions && sparePieces && <SparePieces.Bottom />}
-          </div>
+          </BoardWrapper>
           <CustomDragLayer
             weaponsPieces={weaponsPieces}
             position={currentPosition}

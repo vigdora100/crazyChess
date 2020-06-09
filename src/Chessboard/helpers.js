@@ -1,25 +1,56 @@
 import diff from 'deep-diff';
-
+import {foreach} from 'lodash'
 export const ItemTypes = { PIECE: 'piece' };
 export const COLUMNS = 'abcdefgh'.split('');
 
 export const constructPositionAttributes = (currentPosition, position) => {
   const difference = diff(currentPosition, position);
-  const squaresAffected = difference.length;
-  const sourceSquare =
+  const numberOfDIfferences  = difference.length;
+  const squaresAffected = numberOfDIfferences;
+  let sourceSquare
+  let targetSquare
+  let sourcePiece
+  if(numberOfDIfferences>2){
+    foreach(difference, (record)=>{
+        if(record.kind  === 'D'){
+          sourceSquare = record.path && record.path[0]
+          if(record.path[1] === 'pieceCode'){
+            sourcePiece = record.lhs
+          }
+        }
+        if(record.kind  === 'N'){
+          sourceSquare = record.path && record.path[0]
+        }
+        if(record.kind  === 'E'){
+          sourceSquare = record.path && record.path[0]
+        }
+    })
+  }else{
+   sourceSquare =
     difference && difference[1] && difference && difference[1].kind === 'D'
       ? difference[1].path && difference[1].path[0]
       : difference[0].path && difference[0].path[0];
-  const targetSquare =
+   targetSquare =
     difference && difference[1] && difference && difference[1].kind === 'D'
       ? difference[0] && difference[0].path[0]
       : difference[1] && difference[1].path[0];
-  const sourcePiece =
+  sourcePiece =
     difference && difference[1] && difference && difference[1].kind === 'D'
       ? difference[1] && difference[1].lhs
       : difference[1] && difference[1].rhs;
+  }
   return { sourceSquare, targetSquare, sourcePiece, squaresAffected };
 };
+
+function fixPosition(position) {
+  let fixedPosition = {}
+  foreach(position, (squareObj,square) =>{
+        console.log(squareObj)
+        fixedPosition[square] = {'pieceCode': squareObj.pieceCode}
+  })
+  console.log('fixed Position',fixedPosition )
+  return fixedPosition
+}
 
 function isString(s) {
   return typeof s === 'string';

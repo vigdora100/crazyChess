@@ -11,11 +11,14 @@ import { oppositeColor } from '../Chessboard/helpers'
 
 
 const BonusCard = styled.button`
+    display: flex;
     width:100px;
     height: 50px;
-    display: flex;
     align-items: center;
+    ${({buttonClicked})=> 
+        (buttonClicked && `background-color: #ABB5BF`)}
 `
+
 
 const PieceButton = styled.button`
 `
@@ -103,13 +106,13 @@ class removePiece extends React.Component {
     }
 
     render() {
-        const { options, color, clickOnWeapon, key } = this.props
+        const { options, color, clickOnWeapon, index, buttonClicked } = this.props
         const { pieceType} = options;
         const { turns, weaponFired, weaponRemoved } = this.state
 
         let typeAndColorPiece = oppositeColor(color) + pieceType.toUpperCase();
         return (
-            !weaponRemoved ? <BonusCard onClick={()=>clickOnWeapon('RemovePiece', options, key)} disabled={weaponFired}>
+            !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} onClick={()=>clickOnWeapon('RemovePiece', options, index)} disabled={weaponFired}>
                 <img src={`/${RemoveSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>

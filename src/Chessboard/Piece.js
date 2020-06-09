@@ -10,8 +10,8 @@ import { ItemTypes } from './helpers';
 
 const Duration = styled.div`
    position: absolute;
-   bottom: 3px;
-   right: 3px;
+   bottom: 1px;
+   right: 1px;
 `;
 
 /* eslint react/prop-types: 0 */
@@ -43,8 +43,9 @@ export const renderChessPiece = ({
   };
   let isWeapon = get(pieceData,'isWeapon');
   let weaponImageCode = isWeapon && getWeaponImageCode(pieceData,weaponsLogic)
+  console.log('square:',square)
+  console.log('pieceData:',pieceData)
   return (
-    !isWeapon || weaponImageCode ?
     (<div
       data-testid={`${piece}-${square}`}
       onClick={() => onPieceClick(piece)}
@@ -65,12 +66,12 @@ export const renderChessPiece = ({
         ...customDragLayerStyles
       }}
     >
-        <svg viewBox={`1 1 43 43`} width={width / 8} height={width / 8}>
+         {!isWeapon || weaponImageCode ? (<svg viewBox={`1 1 43 43`} width={width / 8} height={width / 8}>
           <g>{isWeapon ?  weaponsPieces[piece] : pieces[piece] }
-          </g>
-        </svg>
+          </g> 
+        </svg>) : null }
           {isWeapon ? <Duration> {get(pieceData,'duration')}</Duration> : null }
-          </div>) : <div></div>   
+            </div>)
   );
 };
 
@@ -114,7 +115,6 @@ class Piece extends Component {
       this.props.waitForTransition !== nextProps.waitForTransition ||
       // if the screen size changes then update
       this.props.width !== nextProps.width;
-
     if (shouldPieceUpdate) {
       return true;
     }
@@ -300,8 +300,7 @@ const pieceStyles = ({
     getSquareCoordinates
   }),
   transition: `transform ${transitionDuration}ms`,
-  position: 'relative',
-  zIndex: 5,
+    zIndex: 5,
   cursor: isDragging
     ? '-webkit-grabbing'
     : allowDrag({ piece, sourceSquare: square })

@@ -11,9 +11,12 @@ const BonusCard = styled.button`
     display: flex;
     width:100px;
     height: 50px;
+    justify-content: center;
     align-items: center;
-    justify-content: center
+    ${({buttonClicked})=> 
+        (buttonClicked && `background-color: #ABB5BF`)}
 `
+
 
 const PieceButton = styled.button`
 `
@@ -108,11 +111,11 @@ class upgradePiece extends React.Component {
     }
 
     render() {
-        const { clickOnWeapon, options, key } = this.props
+        const { clickOnWeapon, options, index, buttonClicked } = this.props
         const { turns, weaponFired, weaponRemoved } = this.state
 
         return ( //TODO: make it show it is remove weapon
-            !weaponRemoved ? <BonusCard onClick={()=>clickOnWeapon('UpgradePiece',options, key)} disabled={weaponFired}>
+            !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} onClick={()=>clickOnWeapon('UpgradePiece',options, index)} disabled={weaponFired}>
                 <img src={`/${upgradeSign}`}></img>
                 <div>{turns}</div>
             </BonusCard> : null
