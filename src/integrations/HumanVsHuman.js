@@ -110,14 +110,7 @@ class HumanVsRandomBase extends Component {
         tokens[1] = CurrentPlayerColor =='w' ? 'b' : 'w'
         tokens[3] = '-'
         let newFen = tokens.join(' ')
-        this.gameEngine.load(newFen);
-        this.setState({fen: newFen})
         let playerWeapons = this.getPlayerWeapons();
-        playerWeapons.forEach((weapon)=>{
-            if (weapon.weaponType == weaponType){
-                weapon.deployed = true;
-            } 
-        })
         return this.modifyWeaponsCollection(weaponType,playerWeapons, lastMove, newFen, playerNumber,'REMOVE', index )
     }
 
