@@ -5,40 +5,19 @@ export const COLUMNS = 'abcdefgh'.split('');
 
 export const constructPositionAttributes = (currentPosition, position) => {
   const difference = diff(currentPosition, position);
-  const numberOfDIfferences  = difference.length;
-  const squaresAffected = numberOfDIfferences;
-  let sourceSquare
-  let targetSquare
-  let sourcePiece
-  if(numberOfDIfferences>2){
-    foreach(difference, (record)=>{
-        if(record.kind  === 'D'){
-          sourceSquare = record.path && record.path[0]
-          if(record.path[1] === 'pieceCode'){
-            sourcePiece = record.lhs
-          }
-        }
-        if(record.kind  === 'N'){
-          sourceSquare = record.path && record.path[0]
-        }
-        if(record.kind  === 'E'){
-          sourceSquare = record.path && record.path[0]
-        }
-    })
-  }else{
-   sourceSquare =
+  const squaresAffected = difference.length;
+  const sourceSquare =
     difference && difference[1] && difference && difference[1].kind === 'D'
       ? difference[1].path && difference[1].path[0]
       : difference[0].path && difference[0].path[0];
-   targetSquare =
+  const targetSquare =
     difference && difference[1] && difference && difference[1].kind === 'D'
       ? difference[0] && difference[0].path[0]
       : difference[1] && difference[1].path[0];
-  sourcePiece =
+  const sourcePiece =
     difference && difference[1] && difference && difference[1].kind === 'D'
       ? difference[1] && difference[1].lhs
       : difference[1] && difference[1].rhs;
-  }
   return { sourceSquare, targetSquare, sourcePiece, squaresAffected };
 };
 
@@ -79,7 +58,7 @@ export function fenToObj(fen) {
       } else {
         // piece
         let square = COLUMNS[colIdx] + currentRow;
-        position[square] = {pieceCode: fenToPieceCode(row[j])}
+        position[square] = fenToPieceCode(row[j])
         colIdx = colIdx + 1;
       }
     }
@@ -215,7 +194,3 @@ export function objToFen(obj) {
   return fen;
 }
 
-
-export const oppositeColor= (color) => {
-    return color == 'w' ? 'b' : 'w'
-}

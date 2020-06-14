@@ -32,9 +32,10 @@ export const renderChessPiece = ({
   customDragLayerStyles = {},
   phantomPieceStyles = {},
   pieceData,
-  weaponsPieces,
+  weaponsOnBoard,
 }) => {
   const renderChessPieceArgs = {
+    duration: get(weaponsOnBoard, `[${square}].duration`),
     squareWidth: width / 8,
     isDragging,
     droppedPiece: dropTarget && dropTarget.piece,
@@ -43,10 +44,8 @@ export const renderChessPiece = ({
   };
   let isWeapon = get(pieceData,'isWeapon');
   let weaponImageCode = isWeapon && getWeaponImageCode(pieceData,weaponsLogic)
-  console.log('square:',square)
-  console.log('pieceData:',pieceData)
   return (
-    (<div
+    <div
       data-testid={`${piece}-${square}`}
       onClick={() => onPieceClick(piece)}
       style={{
@@ -66,12 +65,14 @@ export const renderChessPiece = ({
         ...customDragLayerStyles
       }}
     >
-         {!isWeapon || weaponImageCode ? (<svg viewBox={`1 1 43 43`} width={width / 8} height={width / 8}>
-          <g>{isWeapon ?  weaponsPieces[piece] : pieces[piece] }
-          </g> 
-        </svg>) : null }
-          {isWeapon ? <Duration> {get(pieceData,'duration')}</Duration> : null }
-            </div>)
+        {typeof pieces[piece] === 'function' ? (
+        pieces[piece](renderChessPieceArgs)
+      ) : (
+        <svg viewBox={`1 1 43 43`} width={width / 8} height={width / 8}>
+          <g>{pieces[piece]}</g>
+        </svg>
+      )}
+    </div>
   );
 };
 
@@ -102,7 +103,7 @@ class Piece extends Component {
     wasSquareClicked: PropTypes.func,
     allowDrag: PropTypes.func,
     pieceData: PropTypes.object,
-    weaponsPieces: PropTypes.object
+    weaponsOnBoard: PropTypes.object
   };
 
   shouldComponentUpdate(nextProps) {
@@ -149,7 +150,7 @@ class Piece extends Component {
       dropTarget,
       onPieceClick,
       allowDrag,
-      weaponsPieces,
+      weaponsOnBoard,
       pieceData
     } = this.props;
 
@@ -168,7 +169,7 @@ class Piece extends Component {
         dropTarget,
         onPieceClick,
         allowDrag,
-        weaponsPieces,
+        weaponsOnBoard,
         pieceData
       })
     );

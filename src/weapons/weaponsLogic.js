@@ -1,18 +1,16 @@
-import oponentColor  from './helpers'
+import { opponentColor }  from './helpers'
 
 export default {
     AddPiece : {
-            weaponFire : ({weaponUsage, playerColor, square, gameEngine, gameInDB,changeTurn,weaponsOnBoard,playerNumber}) => {
-                const { options: {pieceType :pieceType}, weaponType, index } = weaponUsage
-                let pieceCode = playerColor + pieceType.toUpperCase();
-                let weaponsOnBoardObj = { weaponsOnBoard : Object.assign(weaponsOnBoard,{[square]: {color: playerColor, 
-                    ...weaponUsage.options, pieceCode: pieceCode, isWeapon: true, weaponType:'AddPiece'}})}
+            weaponFire : ({weaponUsage, playerColor, square, gameEngine}) => {
+                const { options: {pieceType :pieceType} } = weaponUsage
+                let pieceCode = playerColor + pieceType.toUpperCase() + 'weapon'
+                let weaponObj = {[square]: {color: playerColor, 
+                    ...weaponUsage.options, pieceCode: pieceCode, weaponType:'AddPiece'}}
                 let piece = { type: pieceType, color: playerColor }
                 gameEngine.put(piece, square)
                 let lastMove = { to: square, type: pieceType, moveType: 'weapon', color:playerColor }
-                let game = Object.assign(changeTurn(weaponType, lastMove, playerColor, playerNumber, index),weaponsOnBoardObj);
-                game.moveNumber = gameInDB.moveNumber+1
-                return game
+                return {weaponObj, lastMove}
             },
             weaponRemoved: ({weaponsOnBoardCopy, gameEngine, square}) => {
                 delete weaponsOnBoardCopy[square]
@@ -39,31 +37,31 @@ export default {
             }
         },
     RemovePiece : {
-        weaponFire : ({weaponUsage, playerColor, square, gameEngine, gameInDB,changeTurn,weaponsOnBoard,playerNumber}) => {
-            const { options: {pieceType :pieceType}, weaponType, index } = weaponUsage
-            let pieceCode = oponentColor(playerColor) + pieceType.toUpperCase();
-            let weaponsOnBoardObj = { weaponsOnBoard :Object.assign(weaponsOnBoard, {[square]: {color: oponentColor(playerColor), 
-                ...weaponUsage.options, pieceCode: pieceCode, isWeapon:true, weaponType: 'RemovePiece'}})}
+        weaponFire : ({weaponUsage, playerColor, square, gameEngine}) => {
+            const { options: {pieceType :pieceType} } = weaponUsage
+            let pieceCode = 'noPiece';
+            let weaponObj = {[square]: {color: opponentColor(playerColor), 
+                ...weaponUsage.options, pieceCode: pieceCode, weaponType: 'RemovePiece'}}
             gameEngine.remove(square)
             let lastMove = { to: square, type: pieceType, moveType: 'weapon', playerColor }
-            let game = Object.assign(changeTurn(weaponType, lastMove, playerColor, playerNumber,index),weaponsOnBoardObj);
-            game.moveNumber = gameInDB.moveNumber+1
-            return game
+            return {lastMove, weaponObj}
         },
         
-        weaponRemoved: ({weaponsOnBoardCopy ,gameEngine,modifyWeaponsCollection, playerNumber, weapon, square}) =>{
+        weaponRemoved: ({weaponsOnBoardCopy ,gameEngine, playerNumber, weapon, square}) =>{
             const { pieceType, color} = weapon;
             let opponentPlayerNumber = playerNumber == 'p1' ? 'p2' : 'p1';
             let isTherePiece = gameEngine.get(square)
-            let lastMove = { from: square, moveType: 'remove-weapon', color:opponentPlayerNumber }
             let piece = { type: pieceType, color: color }
             if(!isTherePiece){
                 gameEngine.put(piece,square)
                 gameEngine.load(gameEngine.fen())
                 delete weaponsOnBoardCopy[square]
-            }else{
+            }else{//this code doesnt work!!! every piece/weapon taking this will remove
+                //we need to create an event mechanizem 
                 let weaponToAdd = {weaponType: 'ADD_PIECE', options: {pieceType: pieceType}};
-                modifyWeaponsCollection('REMOVE_PIECE',weaponToAdd, lastMove, gameEngine.fen(),opponentPlayerNumber, 'ADD' )
+                let oponentPlayerWeapons = get(gameInDB,`[${opponentPlayerNumber}].weapons`)
+                oponentPlayerWeapons.push(weaponToAdd)
+                return {[opponentPlayerNumber]: { weapons: oponentPlayerWeapons}}
             }
         },
         movementLogic: () =>{
@@ -164,16 +162,14 @@ const downGradingMap = {
 }
 
 const changeOponnentPiece = (gameParams,playerColor,pieceToReplace,newPiece, weaponType) =>{
-    const {weaponUsage, square, gameEngine, gameInDB,changeTurn,weaponsOnBoard, playerNumber} = gameParams
+    const {weaponUsage, square, gameEngine} = gameParams
     gameEngine.put(newPiece, square)
-    let pieceCode = playerColor + newPiece.type.toUpperCase();
-    let weaponsOnBoardObj = { weaponsOnBoard : Object.assign(weaponsOnBoard,{[square]: {color: playerColor, 
-        ...weaponUsage.options, pieceCode: pieceCode, isWeapon: true,
-         weaponType: weaponType, originalPieceInSquare:pieceToReplace}})}
+    let pieceCode = newPiece.color + newPiece.type.toUpperCase()+ 'weapon';
+    let weaponObj =  {[square]: {color: playerColor, 
+        ...weaponUsage.options, pieceCode: pieceCode,
+         weaponType: weaponType, originalPieceInSquare:pieceToReplace}}
     let lastMove = { to: square, moveType: 'weapon', color:playerColor }
-    let game = Object.assign(changeTurn(weaponType, lastMove, playerColor, playerNumber,weaponUsage.index),weaponsOnBoardObj);
-    game.moveNumber = gameInDB.moveNumber+1
-    return game
+    return {lastMove,weaponObj}
 }
 
 

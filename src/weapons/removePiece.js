@@ -2,7 +2,7 @@ import React from 'React'
 import styled from 'styled-components'
 import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
 import RemoveSign from '../Chessboard/svg/weapons/remove.svg';
-import { oppositeColor } from '../Chessboard/helpers'
+import  { opponentColor }  from './helpers'
 
 const BonusCard = styled.button`
     display: flex;
@@ -27,7 +27,7 @@ class removePiece extends React.Component {
         const { pieceType} = options;
         const { turns, weaponFired, weaponRemoved } = this.state
 
-        let typeAndColorPiece = oppositeColor(color) + pieceType.toUpperCase();
+        let typeAndColorPiece = opponentColor(color) + pieceType.toUpperCase();
         return (
             !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} 
             onClick={()=>clickOnWeapon('RemovePiece', options, index)}

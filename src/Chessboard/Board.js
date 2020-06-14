@@ -68,11 +68,10 @@ class Board extends Component {
                   >
                     {this.hasPiece(context.currentPosition, square) ? (
                       <Piece
+                        weaponsOnBoard={context.weaponsOnBoard}
                         pieces={context.pieces}
-                        weaponsPieces={context.weaponsPieces}
                         square={square}
-                        pieceData={context.currentPosition[square]}
-                        piece={context.currentPosition[square].pieceCode}
+                        piece={context.currentPosition[square]}
                         width={context.width}
                         setPosition={context.setPosition}
                         dropOffBoard={context.dropOffBoard}
@@ -93,7 +92,7 @@ class Board extends Component {
                         allowDrag={context.allowDrag}
                       />
                     ) : null}
-
+                    
                     {this.showPhantom({
                       square,
                       targetSquare: context.targetSquare,

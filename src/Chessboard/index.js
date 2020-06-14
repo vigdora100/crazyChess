@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import Board from './Board';
 import PropTypes from 'prop-types';
-import isEqual from 'lodash.isequal';
+import {isEqual,foreach} from 'lodash';
 import { DragDropContext } from 'react-dnd';
 import MultiBackend from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch';
 import styled from 'styled-components';
-import downgradeSign from '../Chessboard/svg/weapons/downgrade.svg';
 
 import SparePieces from './SparePieces';
 import {
@@ -24,11 +23,14 @@ const ChessboardContext = React.createContext();
 
 const BoardWrapper = styled.div`
 `
-
 const getPositionObject = (position, weaponsOnBoard) => {
+  let weaponsOnBoardBasic = {}
+  foreach(weaponsOnBoard, (value, key)=> {
+      weaponsOnBoardBasic[key] = value.pieceCode
+  })
   if (position === 'start')
     return fenToObj('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
-  if (validFen(position)) return Object.assign(fenToObj(position),weaponsOnBoard);
+  if (validFen(position)) return Object.assign(fenToObj(position),weaponsOnBoardBasic);
   if (validPositionObject(position)) return position;
 
   return {};
@@ -419,7 +421,7 @@ class Chessboard extends Component {
   };
 
   render() {
-    const { sparePieces, id, orientation, dropOffBoard } = this.props;
+    const { sparePieces, id, orientation, dropOffBoard, weaponsOnBoard } = this.props;
     const {
       sourceSquare,
       targetSquare,
@@ -432,7 +434,6 @@ class Chessboard extends Component {
       screenWidth,
       screenHeight,
       pieces,
-      weaponsPieces
     } = this.state;
 
     const getScreenDimensions = screenWidth && screenHeight;
@@ -443,7 +444,7 @@ class Chessboard extends Component {
           value={{
             ...this.props,
             pieces,
-            weaponsPieces,
+            weaponsOnBoard,
             orientation: orientation.toLowerCase(),
             dropOffBoard: dropOffBoard.toLowerCase(),
             ...{
@@ -470,7 +471,7 @@ class Chessboard extends Component {
             {getScreenDimensions && sparePieces && <SparePieces.Bottom />}
           </BoardWrapper>
           <CustomDragLayer
-            weaponsPieces={weaponsPieces}
+            weaponsOnBoard={weaponsOnBoard}
             position={currentPosition}
             width={this.getWidth()}
             pieces={pieces}
