@@ -35,4 +35,18 @@ class upgradePiece extends React.Component {
     }
 }
 
+
+export class upgradePiecePicker extends React.Component {
+    
+    render() {
+        const { clickOnWeapon,buttonClicked} = this.props
+        return (
+          <BonusCard buttonClicked={buttonClicked} 
+            onClick={()=>clickOnWeapon('UpgradePiece')}>
+                <img src={`/${upgradeSign}`}></img>
+            </BonusCard> 
+        )
+    }
+}
+
 export default upgradePiece

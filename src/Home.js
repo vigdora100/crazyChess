@@ -6,6 +6,7 @@ import {get} from 'lodash'
 import Utils from './Chessboard/utils'
 import { browserHistory } from 'react-router'
 import HomeMenu from './HomeMenu'
+import WeaponsCollection from '../src/weapons/weaponsCollectionPage/WeaponsCollection'
 
 const {firebase} = window;
 
@@ -58,12 +59,8 @@ export default function Home() {
         <Page>
             <Router>
                 <Switch>
-                    <Route exact path="/playVSHuman/:token"><HumanVsHuman/></Route>
-                    <Route path="/playVSHuman/"><HumanVsHuman/></Route>
-                    <Route path={'/PlayRandomMoveEngine'}><PlayRandomMoveEngine/></Route>
-                    <Route path={'/'}>
+                    <Route path="/playVSHuman/"><WeaponsCollection/></Route>
                         <HomeMenu/>
-                    </Route>
                 </Switch>
             </Router>
         </Page>

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Home from './home';
+import Home from './Home';
 import {Provider} from 'react-redux';
 import store from './store'
 

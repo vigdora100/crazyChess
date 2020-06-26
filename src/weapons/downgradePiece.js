@@ -35,4 +35,17 @@ class downGradePiece extends React.Component {
     }
 }
 
+export class downgradePiecePicker extends React.Component {
+    
+    render() {
+        const { clickOnWeapon,buttonClicked} = this.props
+        return (
+          <BonusCard buttonClicked={buttonClicked} 
+            onClick={()=>clickOnWeapon('DowngradePiece')}>
+                <img src={`/${downgradeSign}`}></img>
+            </BonusCard> 
+        )
+    }
+}
+
 export default downGradePiece

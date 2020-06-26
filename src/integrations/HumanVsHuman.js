@@ -189,6 +189,7 @@ class HumanVsRandomBase extends Component {
             updatedGame.gameStatus = this.checkIfGameOver(this.gameEngine, playerNumber)
             updatedGame.moveNumber = gameInDB.moveNumber+1
             games(dataBaseId).update(updatedGame);
+            //TODO: update fen in state here also
             this.clearWeaponUsage()
         }
     }

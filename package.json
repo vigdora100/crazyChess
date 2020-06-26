@@ -36,6 +36,7 @@
   },
   "homepage": "https://github.com/willb335/chessboardjsx#readme",
   "dependencies": {
+    "antd": "^4.3.5",
     "copy-webpack-plugin": "^5.1.1",
     "deep-diff": "1.0.1",
     "lodash": "^4.17.15",
@@ -43,7 +44,10 @@
     "react-dnd": "2.6.0",
     "react-dnd-html5-backend": "4.0.5",
     "react-dnd-multi-backend": "3.1.2",
+    "react-dropdown": "^1.7.0",
+    "react-dropdown-now": "^3.0.0",
     "react-inlinesvg": "^1.2.0",
+    "react-modal": "^3.11.2",
     "react-redux": "^7.2.0",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",

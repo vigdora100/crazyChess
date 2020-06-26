@@ -1,28 +1,28 @@
-import { clone } from 'lodash'
+import { clone, get } from 'lodash'
 
+let initialState = { weaponsCollection: [] }
 
-let initialState = {currentWeapon: {name: "", option: ""},
- weaponCollection: [{weaponType: 'DowngradePiece', options: { duration: 2}},
+/*  weaponCollection: [{weaponType: 'DowngradePiece', options: { duration: 2}},
  {weaponType: 'RemovePiece', options: {pieceType: 'b', duration: 2}},
  {weaponType:'AddPiece',options: {pieceType: 'b', duration: 3}},
  {weaponType:'AddPiece',options: {pieceType: 'r', duration: 2}},
  {weaponType:'AddPiece',options: {pieceType: 'q', duration: 3}},
  {weaponType: 'RemovePiece', options: {pieceType: 'p', duration: 2}},
  {weaponType:'UpgradePiece', options: { duration: 2}}
-]};
+]}; */
 
 
-const BonusCardsReducer = (state = initialState, action) => {
-
+const WeaponsReducer = (state = initialState, action) => {
     switch (action.type) {
-
-        case('USE_WEAPON') : {
-            return Object.assign({},state, {currentWeapon: {name: action.weaponType, options: action.weaponOptions }})
+        case('ADD_WEAPON') : {
+            const weaponObject = action;
+            const tempWeaponsCollection = clone(get(state,`weaponsCollection`))
+            tempWeaponsCollection.push(weaponObject)
+            return Object.assign({},state, {weaponsCollection:tempWeaponsCollection })
         }
         case('REMOVE_WEAPON') : {
-            let weaponCollection = clone(state.weaponCollection)
-            weaponCollection.splice(weaponCollection.indexOf(action.weaponType),1)
-            return Object.assign({},state, {weaponCollection: weaponCollection})
+            const tempWeaponsCollection =state.weaponsCollection.filter((val, i) => i !== action.weaponIndex )
+            return Object.assign({},state, {weaponsCollection: tempWeaponsCollection})
         }
         default:
             return initialState;
@@ -30,6 +30,6 @@ const BonusCardsReducer = (state = initialState, action) => {
 }
 
 
-export default BonusCardsReducer
+export default WeaponsReducer
 
 

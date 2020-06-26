@@ -1,21 +1,19 @@
 
-
-export const useWeapon =(weaponType,weaponOptions)=> {
+export const addWeapon =(weaponType,weaponOptions)=> {
 
     return {
-        type: "USE_WEAPON",
+        type: "ADD_WEAPON",
         weaponType: weaponType,
         weaponOptions: weaponOptions
     }
 
 }
 
-
-export const removeWeapon =(weaponType)=> {
+export const removeWeapon =(index)=> {
 
     return {
         type: "REMOVE_WEAPON",
-        weaponType: weaponType,
+        weaponIndex: index
     }
 
 }

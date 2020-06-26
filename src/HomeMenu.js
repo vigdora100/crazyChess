@@ -42,8 +42,6 @@ export default class HomeMenu extends React.Component {
     render(){
         const { value } = this.state
         return (<MenuBox>
-            <MenuButton color='#2ecc40' to={'/PlayRandomMoveEngine'}> against computer</MenuButton>
-            <MenuButton color='#85144b' to={'/home'}> Home</MenuButton>
             <MenuButton color='#ffdc00' to={'/playVSHuman'}> Start a game</MenuButton>
             <FindGame color='#ffdc00'>
                 <Link to={`/playVSHuman/${value}`}> click here </Link>

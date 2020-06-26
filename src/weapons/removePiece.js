@@ -4,7 +4,7 @@ import defaultPieces from '../ChessBoard/svg/chesspieces/standard';
 import RemoveSign from '../Chessboard/svg/weapons/remove.svg';
 import  { opponentColor }  from './helpers'
 
-const BonusCard = styled.button`
+const WeaponWrappar = styled.button`
     display: flex;
     width:100px;
     height: 50px;
@@ -13,7 +13,7 @@ const BonusCard = styled.button`
         (buttonClicked && `background-color: #ABB5BF`)}
 `
 
-class removePiece extends React.Component {
+export default class RemovePiece extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -29,16 +29,15 @@ class removePiece extends React.Component {
 
         let typeAndColorPiece = opponentColor(color) + pieceType.toUpperCase();
         return (
-            !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} 
+            !weaponRemoved ? <WeaponWrappar buttonClicked={buttonClicked} 
             onClick={()=>clickOnWeapon('RemovePiece', options, index)}
              disabled={weaponFired}>
                 <img src={`/${RemoveSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
                 <div>{turns}</div>
                 
-            </BonusCard> : null
+            </WeaponWrappar> : null
         )
     }
 }
 
-export default removePiece

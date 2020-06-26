@@ -1,4 +1,11 @@
 import { opponentColor }  from './helpers'
+import PlusSign from '../Chessboard/svg/weapons/plus.svg';
+import RemoveSign from '../Chessboard/svg/weapons/remove.svg';
+import UpgradeSign from '../Chessboard/svg/weapons/upgrade.svg'
+import DowngradeSign from '../Chessboard/svg/weapons/downgrade.svg'
+
+
+import React from 'react'
 
 export default {
     AddPiece : {
@@ -34,6 +41,9 @@ export default {
             },
             weaponImageCode: () => {
                 return 'classic';
+            },
+            weaponArsenalImage: () => {
+                return <img src={`/${PlusSign}`} ></img>
             }
         },
     RemovePiece : {
@@ -79,6 +89,9 @@ export default {
         },
         weaponImageCode: () => {
             return false;
+        },
+        weaponArsenalImage: () => {
+            return <img src={`/${RemoveSign}`} ></img>
         }
         },
         UpgradePiece : {
@@ -110,6 +123,9 @@ export default {
         },
         weaponImageCode: () => {
             return 'classic';
+        },
+        weaponArsenalImage: () => {
+            return <img src={`/${UpgradeSign}`} ></img>
         }
         },
         DowngradePiece : {
@@ -141,6 +157,9 @@ export default {
             },
             weaponImageCode: () => {
                 return 'classic';
+            },
+            weaponArsenalImage: () => {
+                return <img src={`/${DowngradeSign}`} ></img>
             }
         }
 }
