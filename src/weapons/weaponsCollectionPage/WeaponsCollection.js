@@ -6,6 +6,7 @@ import { addWeapon } from '../actions'
 import styled from 'styled-components';
 import Arsenal from './Arsenal'
 import WeaponsCollectionHeader from './WeaponsCollectionHeader'
+import { piecePointsMap } from '../weaponsPickers/helpers'
 
 const WeaponsWrapper = styled.div`
     display: flex;
@@ -23,7 +24,13 @@ class WeaponsCollection extends Component {
     
      state = { points : 150}
 
-    pointsAdd = (toAdd) => {
+    pointsAdd = (weaponType, duration, piece) => {
+        let piecePoints = 0;
+        if(piece){
+            const pieceFL = piece[1];
+            piecePoints = piecePointsMap[pieceFL];
+        }
+        const toAdd = duration*10+piecePoints
         this.setState(({points}) => ({ points: points+toAdd }));
     }
 
@@ -51,7 +58,7 @@ class WeaponsCollection extends Component {
                 <WeaponsWrapper>
                     {weapons}
                 </WeaponsWrapper>
-                <Arsenal></Arsenal>
+                <Arsenal addPoints={this.pointsAdd}></Arsenal>
             </WeaponsCollectionWrapper>
 
 

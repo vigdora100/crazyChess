@@ -1,13 +1,14 @@
+
 import React from 'react'
 import { connect } from 'react-redux'
-import {addWeapon } from '../../weapons/actions'
+import {addWeapon} from '../../weapons/actions'
 import styled from 'styled-components'
 import defaultPieces from '../../ChessBoard/svg/chesspieces/standard';
 import PlusSign from '../../Chessboard/svg/weapons/plus.svg';
 import 'react-dropdown-now/style.css';
 import 'antd/dist/antd.css';
 import {  Button, Dropdown, Menu, Card  } from 'antd';
-
+import { piecePointsMap, weaponPointsCalc } from './helpers'
 
 const WeaponPickerWrappar = styled.div`
     display: flex;
@@ -24,14 +25,13 @@ const CardWrapper = styled(Card)`
 `
 class addPiecePicker extends React.Component {
     state =  {
-        modalIsOpen: false,
         piece: '',
         numberOfTurns: 0,
-        value: '',
     }
 
     handlePieceClick = (e) => {
-        this.setState({piece: e.key})
+        const pieceName = e.key.split("-")[1]
+        this.setState({piece: pieceName})
     }
 
     handleTurnsClick = (e) => {
@@ -42,79 +42,79 @@ class addPiecePicker extends React.Component {
         console.log('click left button', e);
       }
       
-    clickOnWeapon= ()=>{
-        this.setState({modalIsOpen:true})
-    }
-
     piecePicekd = (piece) => {
         this.setState({'piece': piece})
     }
 
     onSubmit = () => {
-        const { addWeapon } =  this.props
+        const { addWeapon, color, pointsSub } =  this.props
         const { piece, numberOfTurns} = this.state
-        let weaponOptions = { duration: numberOfTurns, pieceType: piece  }
+        const pieceFL = piece[0]
+        let pieceType = `${color}${pieceFL.toUpperCase()}`
+        pointsSub(weaponPointsCalc(piecePointsMap[pieceFL],numberOfTurns))
+        let weaponOptions = { duration: numberOfTurns, pieceType: pieceType  }
         addWeapon('AddPiece', weaponOptions)
     }
 
-    turnsInserted = (event) => {
-        this.setState({numberOfTurns: event.target.value});
-    } 
-
     render() {
-
+        const { piece, numberOfTurns } = this.state
+        const { color, points } = this.props
         const piecesMenu = (
             <Menu onClick={this.handlePieceClick}>
-                <Menu.Item key="Queen" icon={defaultPieces['wQ']} >
-                20 points
+                <Menu.Item key={`${color}Q-Queen`} icon={defaultPieces[`${color}Q`]} disabled={points<piecePointsMap['Q']} >
+                {piecePointsMap['Q']} points
               </Menu.Item>
-              <Menu.Item key="Rook" icon={defaultPieces['wR']} >
-                10 points
+              <Menu.Item key={`${color}R-Rock`} icon={defaultPieces[`${color}R`]} disabled={points<piecePointsMap['R']} >
+                {piecePointsMap['R']}  points
               </Menu.Item>
-              <Menu.Item key="Pawn" icon={defaultPieces['wP']} >
-                3rd item
+              <Menu.Item key={`${color}P-Pawn`} icon={defaultPieces[`${color}P`]} disabled={points<piecePointsMap['P']} >
+                {piecePointsMap['P']}  points
               </Menu.Item>
-              <Menu.Item key="Bishop" icon={defaultPieces['wB']} >
-                3rd item
+              <Menu.Item key={`${color}B-Bishop`} icon={defaultPieces[`${color}B`]} disabled={points<piecePointsMap['B']}>
+                {piecePointsMap['B']} points
               </Menu.Item>
-              <Menu.Item key="Knight" icon={defaultPieces['wN']} >
-                3rd item
+              <Menu.Item key={`${color}K-Knight`} icon={defaultPieces[`${color}K`]} disabled={points<piecePointsMap['K']}>
+                {piecePointsMap['K']} points
               </Menu.Item>
             </Menu>
           );
 
-          const numberOfTurnsMenu = (
+          const numberOfTurnsMenu = (chosenPiece) => {
+            const pieceFL = piece[0]
+            return(
             <Menu onClick={this.handleTurnsClick}>
-              <Menu.Item key="3">
+              <Menu.Item key="3" disabled={points<3*10+piecePointsMap[pieceFL]} >
                 3
               </Menu.Item>
-              <Menu.Item key="5">
+              <Menu.Item key="5" disabled={points<5*10+piecePointsMap[pieceFL]}>
                 5
               </Menu.Item>
-              <Menu.Item key="7">
+              <Menu.Item key="7" disabled={points<7*10+piecePointsMap[pieceFL]}>
                 7
               </Menu.Item>
-              <Menu.Item key="9">
+              <Menu.Item key="9" disabled={points<9*10+piecePointsMap[pieceFL]}>
                 9
               </Menu.Item>
-              <Menu.Item key="12">
+              <Menu.Item key="12" disabled={points<9*10+piecePointsMap[pieceFL]}>
                 12
               </Menu.Item>
             </Menu>
           );
-
-    
-        const { piece, numberOfTurns } = this.state
+            }
+        const isTurnPickerDisabled = piece ? false : true
+        const minimumPoints = piecePointsMap['P'] + 3*10
+        const isSubmitDisasbled = !piece && !numberOfTurns || minimumPoints > points ? true: false 
         return (
             <CardWrapper title="Add Piece" extra={<img src={`/${PlusSign}`}></img>}>
-            <WeaponPickerWrappar>
+            <WeaponPickerWrappar >
                         <Dropdown.Button onClick={this.handleButtonClick} overlay={piecesMenu}>
                          {piece ?  piece :  'pick a piece'}
                         </Dropdown.Button>
-                        <Dropdown.Button onClick={this.handleButtonClick} overlay={numberOfTurnsMenu}>
+                        <Dropdown.Button onClick={this.handleButtonClick} overlay={numberOfTurnsMenu}
+                         disabled={isTurnPickerDisabled}>
                          {numberOfTurns ?  numberOfTurns :  'pick number of turns'}
                         </Dropdown.Button>
-                        <Button type="primary" onClick={()=>this.onSubmit()}>order weapon </Button>
+                        <Button type="primary" onClick={()=>this.onSubmit()} disabled={isSubmitDisasbled}>order weapon </Button>
                 </WeaponPickerWrappar> 
                 </CardWrapper>
             )

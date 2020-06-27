@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import {addWeapon, removeWeapon} from '../../weapons/actions'
+import {addWeapon} from '../../weapons/actions'
 import styled from 'styled-components'
 import defaultPieces from '../../ChessBoard/svg/chesspieces/standard';
 import RemoveSign from '../../Chessboard/svg/weapons/remove.svg';
@@ -8,8 +8,6 @@ import 'react-dropdown-now/style.css';
 import 'antd/dist/antd.css';
 import {  Button, Dropdown, Menu, Card  } from 'antd';
 import { piecePointsMap, weaponPointsCalc } from './helpers'
-
-const Pieces = ['Q','R','B','K','P']
 
 const WeaponPickerWrappar = styled.div`
     display: flex;
@@ -26,10 +24,8 @@ const CardWrapper = styled(Card)`
 `
 class removePiecePicker extends React.Component {
     state =  {
-        modalIsOpen: false,
         piece: '',
         numberOfTurns: 0,
-        value: '',
     }
 
     handlePieceClick = (e) => {
@@ -45,10 +41,6 @@ class removePiecePicker extends React.Component {
         console.log('click left button', e);
       }
       
-    clickOnWeapon= ()=>{
-        this.setState({modalIsOpen:true})
-    }
-
     piecePicekd = (piece) => {
         this.setState({'piece': piece})
     }
@@ -62,10 +54,6 @@ class removePiecePicker extends React.Component {
         let weaponOptions = { duration: numberOfTurns, pieceType: pieceType  }
         addWeapon('RemovePiece', weaponOptions)
     }
-
-    turnsInserted = (event) => {
-        this.setState({numberOfTurns: event.target.value});
-    } 
 
     render() {
         const { piece, numberOfTurns } = this.state
@@ -114,7 +102,8 @@ class removePiecePicker extends React.Component {
             }
 
         const isTurnPickerDisabled = piece ? false : true
-        const isSubmitDisasbled = piece && numberOfTurns ? false: true
+        const minimumPoints = piecePointsMap['P'] + 3*10
+        const isSubmitDisasbled = !piece && !numberOfTurns || minimumPoints > points ? true: false 
         return (
             <CardWrapper title="Remove Piece" extra={<img src={`/${RemoveSign}`}></img>}>
             <WeaponPickerWrappar >

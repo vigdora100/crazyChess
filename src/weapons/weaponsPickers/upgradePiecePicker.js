@@ -1,13 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import {addWeapon } from '../../weapons/actions'
+import {addWeapon} from '../../weapons/actions'
 import styled from 'styled-components'
-import defaultPieces from '../../ChessBoard/svg/chesspieces/standard';
 import upgradeSign from '../../Chessboard/svg/weapons/upgrade.svg';
 import 'react-dropdown-now/style.css';
 import 'antd/dist/antd.css';
 import {  Button, Dropdown, Menu, Card  } from 'antd';
-
+import { piecePointsMap, weaponPointsCalc } from './helpers'
 
 const WeaponPickerWrappar = styled.div`
     display: flex;
@@ -24,14 +23,13 @@ const CardWrapper = styled(Card)`
 `
 class upgradePiecePicker extends React.Component {
     state =  {
-        modalIsOpen: false,
         piece: '',
         numberOfTurns: 0,
-        value: '',
     }
 
     handlePieceClick = (e) => {
-        this.setState({piece: e.key})
+        const pieceName = e.key.split("-")[1]
+        this.setState({piece: pieceName})
     }
 
     handleTurnsClick = (e) => {
@@ -42,76 +40,51 @@ class upgradePiecePicker extends React.Component {
         console.log('click left button', e);
       }
       
-    clickOnWeapon= ()=>{
-        this.setState({modalIsOpen:true})
-    }
-
     piecePicekd = (piece) => {
         this.setState({'piece': piece})
     }
 
     onSubmit = () => {
-        const { addWeapon } =  this.props
-        const { piece, numberOfTurns} = this.state
-        console.log('data: ', {piece, numberOfTurns})
-        let weaponOptions = { duration: numberOfTurns }
+        const { addWeapon, pointsSub } =  this.props
+        const { numberOfTurns} = this.state
+        pointsSub(weaponPointsCalc(0,numberOfTurns))
+        let weaponOptions = { duration: numberOfTurns  }
         addWeapon('UpgradePiece', weaponOptions)
     }
 
-    turnsInserted = (event) => {
-        this.setState({numberOfTurns: event.target.value});
-    } 
-
     render() {
-
-        const piecesMenu = (
-            <Menu onClick={this.handlePieceClick}>
-                <Menu.Item key="Queen" icon={defaultPieces['wQ']} >
-                20 points
-              </Menu.Item>
-              <Menu.Item key="Rook" icon={defaultPieces['wR']} >
-                10 points
-              </Menu.Item>
-              <Menu.Item key="Pawn" icon={defaultPieces['wP']} >
-                3rd item
-              </Menu.Item>
-              <Menu.Item key="Bishop" icon={defaultPieces['wB']} >
-                3rd item
-              </Menu.Item>
-              <Menu.Item key="Knight" icon={defaultPieces['wN']} >
-                3rd item
-              </Menu.Item>
-            </Menu>
-          );
-
+        const { numberOfTurns } = this.state
+        const {  points } = this.props
+        
           const numberOfTurnsMenu = (
             <Menu onClick={this.handleTurnsClick}>
-              <Menu.Item key="3">
+              <Menu.Item key="3" disabled={points<3*10} >
                 3
               </Menu.Item>
-              <Menu.Item key="5">
+              <Menu.Item key="5" disabled={points<5*10}>
                 5
               </Menu.Item>
-              <Menu.Item key="7">
+              <Menu.Item key="7" disabled={points<7*10}>
                 7
               </Menu.Item>
-              <Menu.Item key="9">
+              <Menu.Item key="9" disabled={points<9*10}>
                 9
               </Menu.Item>
-              <Menu.Item key="12">
+              <Menu.Item key="12" disabled={points<9*10}>
                 12
               </Menu.Item>
             </Menu>
-          );
-
-        const { piece, numberOfTurns } = this.state
+          )
+        
+        const minimumPoints =  3*10
+        const isSubmitDisasbled = numberOfTurns && points >= minimumPoints ? false: true
         return (
-            <CardWrapper title="Upgrade Piece" extra={<img src={`/${upgradeSign}`}></img>}>
-            <WeaponPickerWrappar>
+            <CardWrapper title="Downgrade Piece" extra={<img src={`/${upgradeSign}`}></img>}>
+            <WeaponPickerWrappar >
                         <Dropdown.Button onClick={this.handleButtonClick} overlay={numberOfTurnsMenu}>
                          {numberOfTurns ?  numberOfTurns :  'pick number of turns'}
                         </Dropdown.Button>
-                        <Button type="primary" onClick={()=>this.onSubmit()}>order weapon </Button>
+                        <Button type="primary" onClick={()=>this.onSubmit()} disabled={isSubmitDisasbled}>order weapon </Button>
                 </WeaponPickerWrappar> 
                 </CardWrapper>
             )
@@ -123,3 +96,5 @@ const mapDispatchToProps = {
 }
 
 export default connect(null,mapDispatchToProps)(upgradePiecePicker)
+
+
