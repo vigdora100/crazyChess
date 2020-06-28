@@ -35,16 +35,14 @@ const RemoveButton = styled.div`
 `
 
 const Weapon = (props) => {
-        const { weaponType, weaponOptions: {pieceType: pieceType, duration: duration }, removeWeapon, index, addPoints } = props
+        const { weaponType, weaponOptions: {pieceType: pieceType, duration: duration }, removeWeapon, index, addPoints, playerColor } = props
 
     
         return <WeaponWrapper>
                 <RemoveButton onClick={()=>removeWeapon(index) && addPoints(weaponType,parseInt(duration),pieceType) } >
                 <img src={`/${SmallCancel}`} ></img>
                 </RemoveButton>
-                {defaultPieces[pieceType]}
-                {weaponsLogic[weaponType] && weaponsLogic[weaponType].weaponArsenalImage()}
-                {duration}
+                { weaponsLogic[weaponType].weaponArsenalDisplay(playerColor, pieceType,duration)}
                 </WeaponWrapper>      
 }
 
@@ -52,9 +50,9 @@ class Arsenal extends Component {
 
     
     render() {
-        const { weaponsCollection, removeWeapon,addPoints }  = this.props;
+        const { weaponsCollection, removeWeapon,addPoints, playerColor }  = this.props;
         const weaponsArray = map(weaponsCollection, (weaponDetails, key)=>(
-            <Weapon {...weaponDetails} key={key} index={key} removeWeapon={removeWeapon} addPoints={addPoints}/>
+            <Weapon {...weaponDetails} key={key} index={key} removeWeapon={removeWeapon} addPoints={addPoints} playerColor={playerColor}/>
         ))
             return <ArsenalWrapper>
                     {weaponsArray}

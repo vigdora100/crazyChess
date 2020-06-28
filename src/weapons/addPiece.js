@@ -13,28 +13,19 @@ const BonusCard = styled.button`
 `
 
 class addPiece extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            turns: props.turns,
-            piece: props.piece,
-        }
-    }
-
+ 
     render() {
         const { options , color, clickOnWeapon, index, buttonClicked } = this.props
-        const { turns, weaponFired, weaponRemoved } = this.state
 
         let typeAndColorPiece = color + options.pieceType.toUpperCase();
         return (
-            !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} 
-            onClick={()=>clickOnWeapon('AddPiece', options, index)} 
-            disabled={weaponFired}>
+           <BonusCard buttonClicked={buttonClicked} 
+            onClick={()=>clickOnWeapon('AddPiece', options, index)}>
                 <img src={`/${PlusSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
-                <div>{turns}</div>
+                <div>{options.duration}</div>
                 
-            </BonusCard> : null
+            </BonusCard> 
         )
     }
 }

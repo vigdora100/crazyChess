@@ -46,12 +46,11 @@ class removePiecePicker extends React.Component {
     }
 
     onSubmit = () => {
-        const { addWeapon, color, pointsSub } =  this.props
+        const { addWeapon, pointsSub } =  this.props
         const { piece, numberOfTurns} = this.state
-        const pieceFL = piece[0]
-        let pieceType = `${color}${pieceFL.toUpperCase()}`
-        pointsSub(weaponPointsCalc(piecePointsMap[pieceFL],numberOfTurns))
-        let weaponOptions = { duration: numberOfTurns, pieceType: pieceType  }
+        const pieceType = piece[0]
+        pointsSub(weaponPointsCalc(piecePointsMap[pieceType],numberOfTurns))
+        let weaponOptions = { duration: numberOfTurns, pieceType: pieceType.toLowerCase()  }
         addWeapon('RemovePiece', weaponOptions)
     }
 

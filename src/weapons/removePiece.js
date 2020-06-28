@@ -16,27 +16,21 @@ const WeaponWrappar = styled.button`
 export default class RemovePiece extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            turns: props.turns,
-            piece: props.piece,
-        }
     }
 
     render() {
         const { options, color, clickOnWeapon, index, buttonClicked } = this.props
         const { pieceType} = options;
-        const { turns, weaponFired, weaponRemoved } = this.state
 
         let typeAndColorPiece = opponentColor(color) + pieceType.toUpperCase();
         return (
-            !weaponRemoved ? <WeaponWrappar buttonClicked={buttonClicked} 
-            onClick={()=>clickOnWeapon('RemovePiece', options, index)}
-             disabled={weaponFired}>
+            <WeaponWrappar buttonClicked={buttonClicked} 
+            onClick={()=>clickOnWeapon('RemovePiece', options, index)}>
                 <img src={`/${RemoveSign}`} ></img>
                 {defaultPieces[typeAndColorPiece]}
-                <div>{turns}</div>
+                <div>{options.duration}</div>
                 
-            </WeaponWrappar> : null
+            </WeaponWrappar>
         )
     }
 }

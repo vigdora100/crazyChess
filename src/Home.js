@@ -2,13 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import PlayRandomMoveEngine from './integrations/PlayRandomMoveEngine';
 import HumanVsHuman from './integrations/HumanVsHuman';
-import {get} from 'lodash'
+import { get } from 'lodash'
 import Utils from './Chessboard/utils'
 import { browserHistory } from 'react-router'
 import HomeMenu from './HomeMenu'
 import WeaponsCollection from '../src/weapons/weaponsCollectionPage/WeaponsCollection'
 
-const {firebase} = window;
+const { firebase } = window;
 
 import {
     BrowserRouter as Router,
@@ -31,7 +31,7 @@ const Page = styled.div`
 const HumanVsHumanButton = styled.button`
   width: 245px;
   height:300px;
-  background-color: ${({color}) => (color)};
+  background-color: ${({ color }) => (color)};
   font-size: 22px;
   `;
 
@@ -47,8 +47,8 @@ const HumanVsHumanInit = () => {
 
     game.set(newGame)
         .then(() => {
-            return <HumanVsHuman token={newGame.p1_token}/>
-            }, (err) => {
+            return <HumanVsHuman token={newGame.p1_token} />
+        }, (err) => {
             throw err;
         });
 
@@ -59,8 +59,10 @@ export default function Home() {
         <Page>
             <Router>
                 <Switch>
-                    <Route path="/playVSHuman/"><WeaponsCollection/></Route>
-                        <HomeMenu/>
+                    <Route exact path={`/Armory/:token`} component={WeaponsCollection}></Route>
+                    <Route path={`/Armory`} component={WeaponsCollection}></Route>
+                        <Route path={`/StartGame/:token`} component={HumanVsHuman}></Route>
+                    <HomeMenu />
                 </Switch>
             </Router>
         </Page>

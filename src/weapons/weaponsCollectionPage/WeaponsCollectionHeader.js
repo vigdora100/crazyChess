@@ -8,9 +8,11 @@ dislay: flex;
 justify-content: center;
 `
 
-const WeaponsCollectionHeader = ({ points }) => {
+const WeaponsCollectionHeader = ({ points, playerColor, token }) => {
     return <HeaderWrapper>
         {points}
+        {playerColor}
+        {token}
     </HeaderWrapper>
 }
 

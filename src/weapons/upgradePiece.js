@@ -12,38 +12,16 @@ const BonusCard = styled.button`
         (buttonClicked && `background-color: #ABB5BF`)}
 `
 class upgradePiece extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            turns: props.turns,
-            piece: props.piece,
-        }
-    }
+
 
     render() {
         const { clickOnWeapon, options, index, buttonClicked } = this.props
-        const { turns, weaponFired, weaponRemoved } = this.state
 
         return (
-            !weaponRemoved ? <BonusCard buttonClicked={buttonClicked} 
-            onClick={()=>clickOnWeapon('UpgradePiece',options, index)} 
-            disabled={weaponFired}>
+            <BonusCard buttonClicked={buttonClicked} 
+            onClick={()=>clickOnWeapon('UpgradePiece',options, index)} >
                 <img src={`/${upgradeSign}`}></img>
-                <div>{turns}</div>
-            </BonusCard> : null
-        )
-    }
-}
-
-
-export class upgradePiecePicker extends React.Component {
-    
-    render() {
-        const { clickOnWeapon,buttonClicked} = this.props
-        return (
-          <BonusCard buttonClicked={buttonClicked} 
-            onClick={()=>clickOnWeapon('UpgradePiece')}>
-                <img src={`/${upgradeSign}`}></img>
+                <div>{options.duration}</div>
             </BonusCard> 
         )
     }

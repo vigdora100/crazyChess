@@ -42,9 +42,9 @@ export default class HomeMenu extends React.Component {
     render(){
         const { value } = this.state
         return (<MenuBox>
-            <MenuButton color='#ffdc00' to={'/playVSHuman'}> Start a game</MenuButton>
+            <MenuButton color='#ffdc00' to={'/Armory'}> Start a game</MenuButton>
             <FindGame color='#ffdc00'>
-                <Link to={`/playVSHuman/${value}`}> click here </Link>
+                <Link to={`/Armory/${value}`}> click here </Link>
                     <label>
                         Put the game code here:
                         <input type="text" value={this.state.value} onChange={this.handleChange}/>

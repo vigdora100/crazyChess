@@ -32,7 +32,6 @@ const { firebase } = window;
 
 
 import Chessboard from '../Chessboard';
-import Utils from "../Chessboard/utils";
 
 class HumanVsRandomBase extends Component {
     static propTypes = { children: PropTypes.func };
@@ -56,27 +55,12 @@ class HumanVsRandomBase extends Component {
 
     async componentDidMount() {
         let token = get(this, 'props.match.params.token')
-        const { weaponCollection } = this.props
-        if (!token) { //user created new game
-            const newGameSetUp = {
-                p1_token: Utils.token(),
-                p2_token: Utils.token(),
-                fen: STARTING_FEN,
-                p1: {
-                    weapons: weaponCollection
-                },
-                gameStatus: 'Playable',
-                moveNumber: 1,
-            };
-            const DB = firebase.database().ref("games").push();
-            await DB.set(newGameSetUp)
-            token = newGameSetUp.p1_token;
-            this.updateInfo(newGameSetUp.p2_token)
-        }
-        listenForUpdates(token, weaponCollection, (id, game) => {
+        const { playerColor, playerNumber, databaseId } = get(this, 'props.location.state')
+        const { weaponsCollection } = this.props
+
+        await games(`${databaseId}/${playerNumber}`).update({'weapons':weaponsCollection})
+        listenForUpdates(token, weaponsCollection, (id, game) => {
             this.gameEngine.load(game.fen)
-            const playerColor = figurePlayer(token, game); //TODO: chose player color randomely
-            let playerNumber = playerColor == 'w' ? 'p1' : 'p2'
             const lastMove = get(game, 'lastMove')
             this.setState({
                 gameInDB: game,
@@ -87,7 +71,8 @@ class HumanVsRandomBase extends Component {
                 playerNumber: playerNumber,
                 gameStatus: get(game, 'gameStatus'),
                 weaponsOnBoard: get(game, 'weaponsOnBoard') || {},
-                moveNumber: get(game, 'moveNumber')
+                moveNumber: get(game, 'moveNumber'),
+                weaponsCollection: get(game, `${playerNumber}.weapons`)
             })
         });
     }
@@ -222,10 +207,10 @@ class HumanVsRandomBase extends Component {
     updateInfo = (token) => {
         this.setState({ shouldShowInfo: token })
     }
-
+    
     getPlayerWeapons = () => {
         const { gameInDB, playerNumber } = this.state;
-        return playerNumber == 'p1' ? get(gameInDB, 'p1.weapons') : get(gameInDB, 'p2.weapons')
+        return  get(gameInDB, `${playerNumber}.weapons`)
     }
 
     render() {
@@ -245,7 +230,7 @@ class HumanVsRandomBase extends Component {
                             color={playerColor}
                             key={index}
                             index={index}
-                            options={weaponObj.options}
+                            options={weaponObj.weaponOptions}
                             buttonClicked={buttonClicked}
                             clickOnWeapon={this.clickOnWeapon}
                         />
@@ -270,21 +255,16 @@ class HumanVsRandomBase extends Component {
 
 let mapStateToProps = (state) => {
     return {
-        weaponCollection: state.weaponCollection
+        weaponsCollection: state.weaponsCollection
     }
 }
 
-const listenForUpdates = (token, weaponCollection, cb) => {
+const listenForUpdates = (token, weaponsCollection, cb) => {
     const db = firebase.database().ref("/games");
     ["p1_token", "p2_token"].forEach((name) => {
         const ref = db.orderByChild(name).equalTo(token);
         ref.on('value', (ref) => {
             const [id, game] = parse(ref.val());
-            //push weapons for second player TODO: make it beter
-            if (name === "p2_token" && game && game.p2 == null) {
-                game.p2 = { weapons: weaponCollection };
-                games(id).set(game)
-            }
             if (!id) return;
             cb(id, game);
         });

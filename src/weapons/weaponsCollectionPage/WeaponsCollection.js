@@ -1,5 +1,5 @@
 import { MapWeaponPickersToClass } from '../MapWeaponCardsToClass'
-import { mapKeys } from 'lodash'
+import { mapKeys, get } from 'lodash'
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { addWeapon } from '../actions'
@@ -7,12 +7,13 @@ import styled from 'styled-components';
 import Arsenal from './Arsenal'
 import WeaponsCollectionHeader from './WeaponsCollectionHeader'
 import { piecePointsMap } from '../weaponsPickers/helpers'
+import { Link } from "react-router-dom";
+import Utils from "../../Chessboard/utils";
 
 const WeaponsWrapper = styled.div`
     display: flex;
     justify-content: flex-start;
 `
-
 
 const WeaponsCollectionWrapper = styled.div`
     display: flex;
@@ -21,27 +22,73 @@ const WeaponsCollectionWrapper = styled.div`
 `
 
 class WeaponsCollection extends Component {
-    
-     state = { points : 150}
+
+    state = {
+        points: 150,
+        token: '',
+        playerColor: '',
+        playerNumber: '',
+        databaseId:  ''
+    }
+
+    async componentDidMount() {
+        const { firebase } = window;
+        let playerColor;
+        let playerNumber;
+        let databaseId;
+        let token = get(this, 'props.match.params.token')
+        const STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        //const { weaponCollection } = this.props
+        if (!token) { //user created new game
+            playerColor = Math.random() > 0.5 ? 'b' : 'w'
+            playerNumber = 'p1';
+            const newGameSetUp = {
+                p1_token: Utils.token(),
+                p2_token: Utils.token(),
+                fen: STARTING_FEN,
+                p1: {
+                    color: playerColor,
+                    weapons: {}
+                },
+                gameStatus: 'Playable',
+                moveNumber: 1,
+            };
+            const db = firebase.database().ref("games").push();   
+            await db.set(newGameSetUp)
+            token = newGameSetUp.p1_token;
+            databaseId = db.getKey()
+            console.log('newGameSetUp.p2_token:', newGameSetUp.p2_token)
+        }else {
+            playerNumber = 'p2'
+            const db = firebase.database().ref("/games")
+            await db.orderByChild('p2_token').equalTo(token).once('value').then(function (snapshot) {
+                const dbValue =  snapshot.val()
+                const opponentColor = dbValue && dbValue[Object.keys(dbValue)[0]].p1.color;
+                databaseId = Object.keys(dbValue)[0]
+                playerColor = opponentColor == 'b' ? 'w' : 'b'
+            }) 
+        }
+       
+        this.setState({ token: token, playerColor: playerColor, playerNumber: playerNumber, databaseId:databaseId })
+    }
 
     pointsAdd = (weaponType, duration, piece) => {
         let piecePoints = 0;
-        if(piece){
-            const pieceFL = piece[1];
-            piecePoints = piecePointsMap[pieceFL];
+        if (piece) {
+            piecePoints = piecePointsMap[piece.toUpperCase()];
         }
-        const toAdd = duration*10+piecePoints
-        this.setState(({points}) => ({ points: points+toAdd }));
+        const toAdd = duration * 10 + piecePoints
+        this.setState(({ points }) => ({ points: points + toAdd }));
     }
 
     pointsSub = (toSub) => {
-        this.setState(({points}) => ({ points: points-toSub }));
+        this.setState(({ points }) => ({ points: points - toSub }));
     }
 
 
     render() {
         let weapons = []
-        const { points } = this.state;
+        const { points, token, playerColor, playerNumber,databaseId } = this.state;
         mapKeys(MapWeaponPickersToClass, (Weapon, Key) => {
             weapons.push(<Weapon
                 points={points}
@@ -54,13 +101,13 @@ class WeaponsCollection extends Component {
         })
         return (
             <WeaponsCollectionWrapper>
-                <WeaponsCollectionHeader points={points}/>
+                <WeaponsCollectionHeader points={points} playerColor={playerColor} token={token} />
                 <WeaponsWrapper>
                     {weapons}
                 </WeaponsWrapper>
-                <Arsenal addPoints={this.pointsAdd}></Arsenal>
+                <Arsenal addPoints={this.pointsAdd} playerColor={playerColor}></Arsenal>
+                <Link color='#ffdc00' to={{ pathname: `/StartGame/${token}`, state: { playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId } }}> Start a game</Link>
             </WeaponsCollectionWrapper>
-
 
         )
     }
