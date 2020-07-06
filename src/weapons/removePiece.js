@@ -13,6 +13,7 @@ const WeaponWrappar = styled.button`
         (buttonClicked && `background-color: #ABB5BF`)}
 `
 
+
 export default class RemovePiece extends React.Component {
     constructor(props) {
         super(props);

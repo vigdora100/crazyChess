@@ -25,6 +25,8 @@ const WeaponWrapper = styled.button`
     align-items: center;
     position: relative;
     margin: 5px;
+    justify-content: center;
+    flex-direction: row;
 `
 
 const RemoveButton = styled.div`

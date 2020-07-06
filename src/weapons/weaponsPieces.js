@@ -20,7 +20,7 @@ export default {
     wBweapon: generateSimpleWeaponCB('wB'),
     wRweapon: generateSimpleWeaponCB('wR'),
     bQweapon: generateSimpleWeaponCB('bQ'),
-    wPweapon: generateSimpleWeaponCB('wP'),
+    bPweapon: generateSimpleWeaponCB('bP'),
     bNweapon: generateSimpleWeaponCB('bN'),
     bBweapon: generateSimpleWeaponCB('bB'),
     bRweapon: generateSimpleWeaponCB('bR'),

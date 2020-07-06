@@ -58,22 +58,22 @@ class downgradePiecePicker extends React.Component {
         
           const numberOfTurnsMenu = (
             <Menu onClick={this.handleTurnsClick}>
-              <Menu.Item key="3" disabled={points<3*10} >
-                3
-              </Menu.Item>
-              <Menu.Item key="5" disabled={points<5*10}>
-                5
-              </Menu.Item>
-              <Menu.Item key="7" disabled={points<7*10}>
-                7
-              </Menu.Item>
-              <Menu.Item key="9" disabled={points<9*10}>
-                9
-              </Menu.Item>
-              <Menu.Item key="12" disabled={points<9*10}>
-                12
-              </Menu.Item>
-            </Menu>
+            <Menu.Item key="3" disabled={points<3*10} >
+              {`3 turns - (${3 * 10}  points)`}
+                </Menu.Item>
+            <Menu.Item key="5" disabled={points<5*10}>
+              {`5 turns - (${5 * 10}  points)`}
+                </Menu.Item>
+            <Menu.Item key="7" disabled={points<7*10}>
+              {`7 turns - (${7 * 10}  points)`}
+                </Menu.Item>
+            <Menu.Item key="9" disabled={points<9*10}>
+              {`9 turns -  (${9 * 10}  points)`}
+                </Menu.Item>
+            <Menu.Item key="12" key="12" disabled={points<12*10}>
+              {`12 turns - (${12 * 10}  points)`}
+                </Menu.Item>
+          </Menu>
           )
             
         const minimumPoints =  3*10

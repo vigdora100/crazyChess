@@ -8,6 +8,7 @@ import 'react-dropdown-now/style.css';
 import 'antd/dist/antd.css';
 import {  Button, Dropdown, Menu, Card  } from 'antd';
 import { piecePointsMap, weaponPointsCalc } from './helpers'
+import { opponentColor } from '../../weapons/helpers'
 
 const WeaponPickerWrappar = styled.div`
     display: flex;
@@ -20,7 +21,12 @@ const WeaponPickerWrappar = styled.div`
 const CardWrapper = styled(Card)`
     border: 3px solid #f0f0f0;
     margin-right: 5px;
+`
 
+const PieceMenuRow = styled.div`
+    display: flex;
+    align-items: center;
+    flex-direction: row;
 `
 class removePiecePicker extends React.Component {
     state =  {
@@ -56,23 +62,24 @@ class removePiecePicker extends React.Component {
 
     render() {
         const { piece, numberOfTurns } = this.state
-        const { color, points } = this.props
+        let { color, points } = this.props
+        color = opponentColor(color)
         const piecesMenu = (
             <Menu onClick={this.handlePieceClick}>
-                <Menu.Item key={`${color}Q-Queen`} icon={defaultPieces[`${color}Q`]} disabled={points<piecePointsMap['Q']} >
-                {piecePointsMap['Q']} points
+                <Menu.Item key={`${color}Q-Queen`} disabled={points<piecePointsMap['Q']} >
+                 <PieceMenuRow> {defaultPieces[`${color}Q`]} {piecePointsMap['Q'] } points </PieceMenuRow>
               </Menu.Item>
-              <Menu.Item key={`${color}R-Rock`} icon={defaultPieces[`${color}R`]} disabled={points<piecePointsMap['R']} >
-                {piecePointsMap['R']}  points
+              <Menu.Item key={`${color}R-Rock`} disabled={points<piecePointsMap['R']} >
+                  <PieceMenuRow> {defaultPieces[`${color}R`]} {piecePointsMap['R'] } points </PieceMenuRow>
               </Menu.Item>
-              <Menu.Item key={`${color}P-Pawn`} icon={defaultPieces[`${color}P`]} disabled={points<piecePointsMap['P']} >
-                {piecePointsMap['P']}  points
+              <Menu.Item key={`${color}P-Pawn`}  disabled={points<piecePointsMap['P']} >
+                  <PieceMenuRow> {defaultPieces[`${color}P`]} {piecePointsMap['P'] } points </PieceMenuRow>
               </Menu.Item>
-              <Menu.Item key={`${color}B-Bishop`} icon={defaultPieces[`${color}B`]} disabled={points<piecePointsMap['B']}>
-                {piecePointsMap['B']} points
+              <Menu.Item key={`${color}B-Bishop`} disabled={points<piecePointsMap['B']}>
+                <PieceMenuRow> {defaultPieces[`${color}B`]} {piecePointsMap['B'] } points </PieceMenuRow>
               </Menu.Item>
-              <Menu.Item key={`${color}K-Knight`} icon={defaultPieces[`${color}K`]} disabled={points<piecePointsMap['K']}>
-                {piecePointsMap['K']} points
+              <Menu.Item key={`${color}N-Knight`} disabled={points<piecePointsMap['N']}>
+                <PieceMenuRow> {defaultPieces[`${color}N`]} {piecePointsMap['N'] } points </PieceMenuRow>
               </Menu.Item>
             </Menu>
           );
@@ -80,29 +87,30 @@ class removePiecePicker extends React.Component {
           const numberOfTurnsMenu = (chosenPiece) => {
             const pieceFL = piece[0]
             return(
-            <Menu onClick={this.handleTurnsClick}>
-              <Menu.Item key="3" disabled={points<3*10+piecePointsMap[pieceFL]} >
-                3
-              </Menu.Item>
-              <Menu.Item key="5" disabled={points<5*10+piecePointsMap[pieceFL]}>
-                5
-              </Menu.Item>
-              <Menu.Item key="7" disabled={points<7*10+piecePointsMap[pieceFL]}>
-                7
-              </Menu.Item>
-              <Menu.Item key="9" disabled={points<9*10+piecePointsMap[pieceFL]}>
-                9
-              </Menu.Item>
-              <Menu.Item key="12" disabled={points<9*10+piecePointsMap[pieceFL]}>
-                12
-              </Menu.Item>
+              <Menu onClick={this.handleTurnsClick}>
+              <Menu.Item key="3" disabled={points < 3 * 10 + piecePointsMap[pieceFL]} >
+                {`3 turns - (${3 * 10}  points)`}
+                  </Menu.Item>
+              <Menu.Item key="5" disabled={points < 5 * 10 + piecePointsMap[pieceFL]}>
+                {`5 turns - (${5 * 10}  points)`}
+                  </Menu.Item>
+              <Menu.Item key="7" disabled={points < 7 * 10 + piecePointsMap[pieceFL]}>
+                {`7 turns - (${7 * 10}  points)`}
+                  </Menu.Item>
+              <Menu.Item key="9" disabled={points < 9 * 10 + piecePointsMap[pieceFL]}>
+                {`9 turns -  (${9 * 10}  points)`}
+                  </Menu.Item>
+              <Menu.Item key="12" disabled={points < 9 * 10 + piecePointsMap[pieceFL]}>
+                {`12 turns - (${12 * 10}  points)`}
+                  </Menu.Item>
             </Menu>
           );
             }
 
         const isTurnPickerDisabled = piece ? false : true
         const minimumPoints = piecePointsMap['P'] + 3*10
-        const isSubmitDisasbled = !piece && !numberOfTurns || minimumPoints > points ? true: false 
+        const isSubmitDisasbled = !piece || !numberOfTurns || minimumPoints > points 
+
         return (
             <CardWrapper title="Remove Piece" extra={<img src={`/${RemoveSign}`}></img>}>
             <WeaponPickerWrappar >

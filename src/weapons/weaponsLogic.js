@@ -49,8 +49,8 @@ export default {
         weaponArsenalDisplay: (playerColor, pieceType,duration) => {
             return (
                 <React.Fragment>
-                    {defaultPieces[playerColor + pieceType.toUpperCase()]}
                     <img src={`/${PlusSign}`} ></img>
+                    {defaultPieces[playerColor + pieceType.toUpperCase()]}
                     {duration}
                 </React.Fragment>
             )
@@ -107,8 +107,8 @@ export default {
         weaponArsenalDisplay: (playerColor, pieceType,duration) => {
             return (
                 <React.Fragment>
-                    {defaultPieces[opponentColor(playerColor) + pieceType.toUpperCase()]}
                     <img src={`/${RemoveSign}`} ></img>
+                    {defaultPieces[opponentColor(playerColor) + pieceType.toUpperCase()]}
                     {duration}
                 </React.Fragment>
             )

@@ -9,6 +9,7 @@ import WeaponsCollectionHeader from './WeaponsCollectionHeader'
 import { piecePointsMap } from '../weaponsPickers/helpers'
 import { Link } from "react-router-dom";
 import Utils from "../../Chessboard/utils";
+import ArrowRight from '../../Chessboard/svg/general/arrowRight.svg'
 
 const WeaponsWrapper = styled.div`
     display: flex;
@@ -19,6 +20,22 @@ const WeaponsCollectionWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+`
+const ArrowWrapper = styled.img`
+    width: 200px;
+    height: 200px;
+    &:hover {
+        background-color: #DEDEDE;
+      }
+    `
+
+const ArsenalLinkWrapper = styled.div`
+margin-top: 10px;
+display: flex;
+flex-direction: row;
+justify-content: space-evenly;
+align-items: center;
+width: 100%;
 `
 
 class WeaponsCollection extends Component {
@@ -55,7 +72,7 @@ class WeaponsCollection extends Component {
             };
             const db = firebase.database().ref("games").push();   
             await db.set(newGameSetUp)
-            token = newGameSetUp.p1_token;
+            token = newGameSetUp.p2_token;
             databaseId = db.getKey()
             console.log('newGameSetUp.p2_token:', newGameSetUp.p2_token)
         }else {
@@ -93,7 +110,7 @@ class WeaponsCollection extends Component {
             weapons.push(<Weapon
                 points={points}
                 pointsSub={this.pointsSub}
-                color={'w'}
+                color={playerColor}
                 onSubmit={this.onSubmit}
                 piecePicked={this.piecePickd}
                 clickOnWeapon={() => this.clickOnWeapon()} />
@@ -101,12 +118,17 @@ class WeaponsCollection extends Component {
         })
         return (
             <WeaponsCollectionWrapper>
-                <WeaponsCollectionHeader points={points} playerColor={playerColor} token={token} />
+                <WeaponsCollectionHeader points={points} playerColor={playerColor} token={token} playerNumber={playerNumber} />
                 <WeaponsWrapper>
                     {weapons}
                 </WeaponsWrapper>
+                <ArsenalLinkWrapper>                
                 <Arsenal addPoints={this.pointsAdd} playerColor={playerColor}></Arsenal>
-                <Link color='#ffdc00' to={{ pathname: `/StartGame/${token}`, state: { playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId } }}> Start a game</Link>
+                <Link color='#ffdc00' to={{ pathname: `/StartGame/${ token }`, state: { playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId } }}> 
+                    <ArrowWrapper src={`/${ArrowRight}`}></ArrowWrapper>
+                </Link>
+                </ArsenalLinkWrapper>
+
             </WeaponsCollectionWrapper>
 
         )
