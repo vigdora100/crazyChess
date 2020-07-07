@@ -59,9 +59,9 @@ export default function Home() {
         <Page>
             <Router>
                 <Switch>
+                    <Route exact path={`/StartGame/:token/:playerColor/:playerNumber/:databaseId`} component={HumanVsHuman}></Route>
                     <Route exact path={`/Armory/:token`} component={WeaponsCollection}></Route>
                     <Route path={`/Armory`} component={WeaponsCollection}></Route>
-                        <Route path={`/StartGame/:token`} component={HumanVsHuman}></Route>
                     <HomeMenu />
                 </Switch>
             </Router>

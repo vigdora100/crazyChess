@@ -1,4 +1,31 @@
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const merge = require('webpack-merge');
+const common = require('./webpack.common.js');
+module.exports = merge(common, {
+  mode: 'development',
+  devtool: 'inline-source-map',
+  entry: { app: ['babel-polyfill', './src/index.js'] },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    library: 'chessboardjsx',
+    libraryTarget: 'umd'
+  },
+  devServer: { contentBase: path.resolve(__dirname, 'dist') },
+  plugins: [new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new CopyWebpackPlugin([
+      { from: 'src/chessEngine/stockfish.js', to: '/' }
+    ])
+  ],
+  node: {
+    fs: 'empty'
+  },
+});
+
 
 module.exports = {
   resolve: { extensions: ['.js', '.jsx'] },
@@ -28,5 +55,5 @@ module.exports = {
       },
     ]
   },
-  plugins: [new CleanWebpackPlugin(['dist'])]
+  plugins: [new CleanWebpackPlugin(['dist']),new HtmlWebpackPlugin({ template: './src/index.html' })],
 };

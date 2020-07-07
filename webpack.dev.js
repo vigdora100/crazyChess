@@ -16,9 +16,6 @@ module.exports = merge(common, {
   },
   devServer: { contentBase: path.resolve(__dirname, 'dist') },
   plugins: [new HtmlWebpackPlugin({ template: './src/index.html' }),
-    new CopyWebpackPlugin([
-      { from: 'src/chessEngine/stockfish.js', to: 'dist/' }
-    ])
   ],
   node: {
     fs: 'empty'

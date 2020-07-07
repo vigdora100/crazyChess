@@ -124,7 +124,7 @@ class WeaponsCollection extends Component {
                 </WeaponsWrapper>
                 <ArsenalLinkWrapper>                
                 <Arsenal addPoints={this.pointsAdd} playerColor={playerColor}></Arsenal>
-                <Link color='#ffdc00' to={{ pathname: `/StartGame/${ token }`, state: { playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId } }}> 
+                <Link color='#ffdc00' to={{ pathname: `/StartGame/${token}/${playerColor}/${playerNumber}/${databaseId}`, state: { playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId } }}> 
                     <ArrowWrapper src={`/${ArrowRight}`}></ArrowWrapper>
                 </Link>
                 </ArsenalLinkWrapper>
