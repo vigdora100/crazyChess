@@ -22,6 +22,13 @@ const DisableWeapon = styled.button`
     background-image: url(/${cancelWeapon});
 `;
 
+const HumanVsHuman = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100vh;
+`
+
 const GameWrapper = styled.div`
     display:flex;
     align-items: center;
@@ -220,7 +227,7 @@ class HumanVsRandomBase extends Component {
         const gameOverMsg = (gameStatus && gameStatus['gameOver'] == playerNumber && gameStatus) ? 'gameOver' : 'keepPlaying'
         gameOverMsg == 'gameOver' && swal("too bad", "you lost the game!", "warning")
         return (
-            <Fragment>
+            <HumanVsHuman>
                 <Arsenal>
                     {weaponUsage.weaponType ? <DisableWeapon onClick={this.clearWeaponUsage}></DisableWeapon> : <div></div>}
                     {weapons && weapons.map((weaponObj, index) => {
@@ -249,7 +256,7 @@ class HumanVsRandomBase extends Component {
                     <div> {gameOverMsg} </div>
                     <div> it is {turn} turn </div>
                 </InfoBoard>
-            </Fragment>)
+            </HumanVsHuman>)
     }
 }
 

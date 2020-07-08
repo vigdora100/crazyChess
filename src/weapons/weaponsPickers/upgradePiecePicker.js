@@ -79,7 +79,7 @@ class upgradePiecePicker extends React.Component {
         const minimumPoints =  3*10
         const isSubmitDisasbled = numberOfTurns && points >= minimumPoints ? false: true
         return (
-            <CardWrapper title="Downgrade Piece" extra={<img src={`/${upgradeSign}`}></img>}>
+            <CardWrapper title="Upgrade Piece" extra={<img src={`/${upgradeSign}`}></img>}>
             <WeaponPickerWrappar >
                         <Dropdown.Button onClick={this.handleButtonClick} overlay={numberOfTurnsMenu}>
                          {numberOfTurns ?  numberOfTurns :  'pick number of turns'}
