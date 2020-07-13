@@ -7,7 +7,7 @@ const HeaderWrapper = styled.div`
     flex-direction: row;
     width: 100%;
     justify-content: space-around;
-    background-color: #e8e4e4;
+    background-color: #1890ff;
     border-color: black;
     align-items: center;
     position: relative;
@@ -15,9 +15,9 @@ const HeaderWrapper = styled.div`
 `
 
 const Points = styled.span`
-        font-size: 70px;
+    font-size: 70px;
     font-weight: 800;
-    color: red;
+    color: #ff4d4f;
     margin-right: 5px
 `
 const PointsWrapper = styled.div`

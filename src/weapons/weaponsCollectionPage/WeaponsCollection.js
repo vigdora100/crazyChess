@@ -26,11 +26,9 @@ const ArrowWrapper = styled.img`
     height: 200px;
     &:hover {
         background-color: #DEDEDE;
-      }
-    `
-
+    }`
+   
 const ArsenalLinkWrapper = styled.div`
-margin-top: 10px;
 display: flex;
 flex-direction: row;
 justify-content: space-evenly;
@@ -45,7 +43,7 @@ class WeaponsCollection extends Component {
         token: '',
         playerColor: '',
         playerNumber: '',
-        databaseId:  ''
+        databaseId:  '',
     }
 
     async componentDidMount() {
@@ -53,10 +51,13 @@ class WeaponsCollection extends Component {
         let playerColor;
         let playerNumber;
         let databaseId;
+        let timer; 
         let token = get(this, 'props.match.params.token')
+        
         const STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         //const { weaponCollection } = this.props
         if (!token) { //user created new game
+            timer = get(this, 'props.location.state.timer')
             playerColor = Math.random() > 0.5 ? 'b' : 'w'
             playerNumber = 'p1';
             const newGameSetUp = {
@@ -69,27 +70,28 @@ class WeaponsCollection extends Component {
                 },
                 gameStatus: 'Playable',
                 moveNumber: 1,
+                initialTime: timer
             };
             const db = firebase.database().ref("games").push();   
             await db.set(newGameSetUp)
             token = newGameSetUp.p2_token;
             databaseId = db.getKey()
-            console.log('newGameSetUp.p2_token:', newGameSetUp.p2_token)
         }else {
             playerNumber = 'p2'
             const db = firebase.database().ref("/games")
             await db.orderByChild('p2_token').equalTo(token).once('value').then(function (snapshot) {
                 const dbValue =  snapshot.val()
                 const opponentColor = dbValue && dbValue[Object.keys(dbValue)[0]].p1.color;
+                timer = dbValue && dbValue[Object.keys(dbValue)[0]].initialTime
                 databaseId = Object.keys(dbValue)[0]
                 playerColor = opponentColor == 'b' ? 'w' : 'b'
             }) 
         }
        
-        this.setState({ token: token, playerColor: playerColor, playerNumber: playerNumber, databaseId:databaseId })
+        this.setState({ token: token, playerColor: playerColor, playerNumber: playerNumber, databaseId:databaseId, timer: timer })
     }
 
-    pointsAdd = (weaponType, duration, piece) => {
+    pointsAdd = (duration, piece) => {
         let piecePoints = 0;
         if (piece) {
             piecePoints = piecePointsMap[piece.toUpperCase()];
@@ -105,7 +107,8 @@ class WeaponsCollection extends Component {
 
     render() {
         let weapons = []
-        const { points, token, playerColor, playerNumber,databaseId } = this.state;
+        const { points, token, playerColor, playerNumber,databaseId, timer } = this.state;
+
         mapKeys(MapWeaponPickersToClass, (Weapon, Key) => {
             weapons.push(<Weapon
                 points={points}
@@ -122,13 +125,13 @@ class WeaponsCollection extends Component {
                 <WeaponsWrapper>
                     {weapons}
                 </WeaponsWrapper>
-                <ArsenalLinkWrapper>                
-                <Arsenal addPoints={this.pointsAdd} playerColor={playerColor}></Arsenal>
-                <Link color='#ffdc00' to={{ pathname: `/StartGame/${token}/${playerColor}/${playerNumber}/${databaseId}`, state: { playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId } }}> 
-                    <ArrowWrapper src={`/${ArrowRight}`}></ArrowWrapper>
-                </Link>
-                </ArsenalLinkWrapper>
-
+                    <ArsenalLinkWrapper>                
+                    <Arsenal addPoints={this.pointsAdd} playerColor={playerColor}></Arsenal>
+                    <Link color='#ffdc00' to={{ pathname: `/StartGame/${token}/${playerColor}/${playerNumber}/${databaseId}`, state: { 
+                        playerColor: playerColor, playerNumber:playerNumber, databaseId:databaseId, timer: timer } }}> 
+                        <ArrowWrapper src={`/${ArrowRight}`}></ArrowWrapper>
+                    </Link>
+                    </ArsenalLinkWrapper>
             </WeaponsCollectionWrapper>
 
         )

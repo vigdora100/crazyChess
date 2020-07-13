@@ -74,10 +74,11 @@ class HumanVsRandomBase extends Component {
     }
 
     componentDidUpdate(prevProps, prevState){
-            const { turn, playerColor, opponentCurrentTime, opponentInTheGame } = this.state
+            let { turn, playerColor, opponentCurrentTime, opponentInTheGame, initialTime } = this.state
             if(opponentInTheGame){
             if(turn != prevState.turn && turn == playerColor ){
                 this.myTimerRef.current.timerResume();
+                opponentCurrentTime = opponentCurrentTime || initialTime
                 this.opponenTimerRef.current.setTime(opponentCurrentTime)
                 this.opponenTimerRef.current.timerPause()
             }    
@@ -92,13 +93,16 @@ class HumanVsRandomBase extends Component {
 
 
     async componentDidMount() {
+        const { playerColor, playerNumber, databaseId,timer } = get(this, 'props.location.state')
+        console.log('timer:', timer)
+        this.opponenTimerRef.current.setTime(timer)
         this.opponenTimerRef.current.timerPause()
+        this.myTimerRef.current.setTime(timer)
         this.myTimerRef.current.timerPause()
         let token = get(this, 'props.match.params.token')
-        const { playerColor, playerNumber, databaseId } = get(this, 'props.location.state')
         const { weaponsCollection } = this.props
 
-        await games(`${databaseId}/${playerNumber}`).update({ 'weapons': weaponsCollection, 'inTheGame' : true })
+        await games(`${databaseId}/${playerNumber}`).update({ 'weapons': weaponsCollection, 'inTheGame' : true, 'initialTime': timer })
         listenForUpdates(token, weaponsCollection, (id, game) => {
             this.gameEngine.load(game.fen)
             const lastMove = get(game, 'lastMove')
@@ -115,7 +119,8 @@ class HumanVsRandomBase extends Component {
                 weaponsCollection: get(game, `${playerNumber}.weapons`),
                 opponentInTheGame: get(game, `${opponentPlayerNumber(playerNumber)}.inTheGame`),
                 turn: this.gameEngine.turn(),
-                opponentCurrentTime: get(game, 'currentTime')
+                opponentCurrentTime: get(game, 'currentTime'),
+                initialTime: get(game, `p1.initialTime`)
             })
         });
     }
@@ -221,7 +226,7 @@ class HumanVsRandomBase extends Component {
             updatedGame.currentTime = currentTime;
             updatedGame.weaponsOnBoard = Object.assign(weaponsOnBoard, weaponObj);
             updatedGame.fen = this.changeTurn(playerColor);
-            updatedGame[playerNumber] = { weapons: this.removeWeapon(index) }
+            updatedGame[playerNumber] = { weapons: this.removeWeapon(index), 'inTheGame' : true }
             updatedGame.lastMove = lastMove;
             //to check if game over need to happen after changing turn
             updatedGame.gameStatus = this.checkIfGameOver(this.gameEngine, playerNumber)
@@ -269,12 +274,21 @@ class HumanVsRandomBase extends Component {
         games(dataBaseId).update(game)
     }
 
+    generateGameOverMsg = () =>{
+        const {gameStatus, playerNumber }  =this.state;
+        if(gameStatus && gameStatus['gameOver']){
+             gameStatus['gameOver'] == playerNumber ? swal("too bad", "you lost the game!", "warning") :
+             swal("congratulation", "you won the game!", "success")
+             return 'Game-Over'
+        }
+        return 'Game is on'
+    }
+
     render() {
-        const { fen, squareStyles, playerColor, shouldShowInfo, gameStatus, playerNumber, weaponUsage, weaponsOnBoard } = this.state;
+        const { fen, squareStyles, playerColor, shouldShowInfo, gameStatus, playerNumber, weaponUsage, weaponsOnBoard, initialTime } = this.state;
         const weapons = this.getPlayerWeapons()
         const turn = this.gameEngine.turn();
-        const gameOverMsg = (gameStatus && gameStatus['gameOver'] == playerNumber && gameStatus) ? 'gameOver' : 'keepPlaying'
-        gameOverMsg == 'gameOver' && swal("too bad", "you lost the game!", "warning")
+        const gameOverMsg  = this.generateGameOverMsg(gameStatus,playerNumber)
         return (
             <HumanVsHuman>
                 <Arsenal>
@@ -293,7 +307,7 @@ class HumanVsRandomBase extends Component {
                     })}
                 </Arsenal>
                 <BoardWrapper>
-                <Timer initialTime={100000} ref={this.opponenTimerRef}></Timer>
+                <Timer initialTime={600000} ref={this.opponenTimerRef}></Timer>
                 {this.props.children({
                     orientation: playerColor === 'w' ? "white" : "black",
                     position: fen,
@@ -303,7 +317,7 @@ class HumanVsRandomBase extends Component {
                     weaponsOnBoard: cloneDeep(weaponsOnBoard)
                 })}
                  <Timer 
-                    initialTime={100000} 
+                    initialTime={600000} 
                     ref={this.myTimerRef}
                     checkpoints={[
                         {
