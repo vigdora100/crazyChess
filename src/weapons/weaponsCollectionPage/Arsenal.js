@@ -10,7 +10,7 @@ import { removeWeapon } from '../../weapons/actions'
 const ArsenalWrapper = styled.div`
     height: 300px;
     width: 336px;
-    border-style: dashed;
+    border: solid #ff4d4f;
     margin-right: 30px;
     margin-left: 30px;
     flex-wrap: wrap;

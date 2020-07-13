@@ -20,9 +20,24 @@ const Points = styled.span`
     color: #ff4d4f;
     margin-right: 5px
 `
-const PointsWrapper = styled.div`
 
+const ColorText = styled.span`
+font-size: 30px;
+font-weight: 800;
+color: #ff4d4f;
+margin-right: 5px
 `
+
+const PointsWrapper = styled.div`
+    color: #ff4d4f;
+    font-size: 25px;
+    font-weight: 600;
+`
+
+const PointsText = styled.span`
+ 
+`
+
 
 const PlayerColorWrapper = styled.div`
     display: flex;
@@ -48,10 +63,10 @@ const GameToken = styled.div`
 const WeaponsCollectionHeader = ({ points, playerColor, playerNumber,  token }) => {
     return <HeaderWrapper>
         <PointsWrapper>
-            <Points>{points}</Points><span>points</span>
+            <Points>{points}</Points><PointsText>points</PointsText>
         </PointsWrapper>
         <PlayerColorWrapper>
-            <span>your color: </span><CirclePlayerColor color={playerColor}></CirclePlayerColor>
+            <ColorText>your color: </ColorText><CirclePlayerColor color={playerColor}></CirclePlayerColor>
         </PlayerColorWrapper>
         {playerNumber == 'p1' ?  <GameToken>Game token: {token}</GameToken> : null }
     </HeaderWrapper>
