@@ -29,17 +29,17 @@ const ArrowWrapper = styled.img`
     }`
    
 const ArsenalLinkWrapper = styled.div`
-display: flex;
-flex-direction: row;
-justify-content: space-evenly;
-align-items: center;
-width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
 `
 
 class WeaponsCollection extends Component {
 
     state = {
-        points: 150,
+        points: 250,
         token: '',
         playerColor: '',
         playerNumber: '',

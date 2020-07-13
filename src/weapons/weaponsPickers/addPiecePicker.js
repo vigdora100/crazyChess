@@ -33,11 +33,13 @@ class addPiecePicker extends React.Component {
   state = {
     piece: '',
     numberOfTurns: '',
+    pieceCode: ''
   }
 
   handlePieceClick = (e) => {
     const pieceName = e.key.split("-")[1]
-    this.setState({ piece: pieceName })
+    const pieceCode = e.key.split("-")[0]
+    this.setState({ piece: pieceName, pieceCode: pieceCode })
   }
 
   handleTurnsClick = (e) => {
@@ -48,16 +50,12 @@ class addPiecePicker extends React.Component {
     console.log('click left button', e);
   }
 
-  piecePicekd = (piece) => {
-    this.setState({ 'piece': piece })
-  }
-
   onSubmit = () => {
     const { addWeapon, pointsSub } = this.props
-    const { piece, numberOfTurns } = this.state
-    const pieceType = piece[0]
-    pointsSub(weaponPointsCalc(piecePointsMap[pieceType], numberOfTurns))
-    let weaponOptions = { duration: numberOfTurns, pieceType: pieceType.toLowerCase() }
+    const { numberOfTurns,pieceCode } = this.state
+    const pieceFL = pieceCode[1]
+    pointsSub(weaponPointsCalc(piecePointsMap[pieceFL], numberOfTurns))
+    let weaponOptions = { duration: numberOfTurns, pieceType: pieceFL.toLowerCase() }
     addWeapon('AddPiece', weaponOptions)
   }
 
