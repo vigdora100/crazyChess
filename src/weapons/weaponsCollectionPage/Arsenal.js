@@ -41,7 +41,7 @@ const Weapon = (props) => {
 
     
         return <WeaponWrapper>
-                <RemoveButton onClick={()=>removeWeapon(index) && addPoints(weaponType,parseInt(duration),pieceType) } >
+                <RemoveButton onClick={()=>removeWeapon(index) && addPoints(parseInt(duration),pieceType) } >
                 <img src={`/${SmallCancel}`} ></img>
                 </RemoveButton>
                 { weaponsLogic[weaponType].weaponArsenalDisplay(playerColor, pieceType,duration)}

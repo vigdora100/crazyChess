@@ -6,6 +6,7 @@ export const piecePointsMap = (
         'B': 30,
         'N': 30,
         'P': 10,
+        'K': 30,
     }
 )
 
