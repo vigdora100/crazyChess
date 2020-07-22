@@ -40,8 +40,7 @@ export default {
         validate: ({ gameEngine, square, playerColor, weaponsOnBoard }) => {
             let isTherePiece = gameEngine.get(square)
             //TODO: weapon do no effect other weapons
-            let isThereWeapon = weaponsOnBoard[square];
-            return !isThereWeapon && gameEngine.turn() === playerColor && !isTherePiece
+            return crossWeaponValid(isTherePiece,weaponsOnBoard,square) && gameEngine.turn() === playerColor && !isTherePiece
         },
         weaponImageCode: () => { //weaponBoardImageCode
             return 'classic';
@@ -97,8 +96,7 @@ export default {
             const { options: { pieceType: pieceType } } = weaponUsage
             let isTherePiece = gameEngine.get(square)
             //TODO: weapon do no effect other weapons
-            let isThereWeapon = weaponsOnBoard[square];
-            return !isThereWeapon && gameEngine.turn() === playerColor && isTherePiece && isTherePiece.type == pieceType &&
+            return crossWeaponValid(isTherePiece,weaponsOnBoard,square) && gameEngine.turn() === playerColor && isTherePiece && isTherePiece.type == pieceType &&
                 isTherePiece.color != playerColor
         },
         weaponImageCode: () => {
@@ -138,8 +136,7 @@ export default {
         validate: ({ gameEngine, square, playerColor, weaponsOnBoard }) => {
             let isTherePiece = gameEngine.get(square)
             //TODO: weapon do no effect other weapons
-            let isThereWeapon = weaponsOnBoard[square];
-            return !isThereWeapon && gameEngine.turn() === playerColor && isTherePiece && isTherePiece.color == playerColor
+            return crossWeaponValid(isTherePiece,weaponsOnBoard,square) && gameEngine.turn() === playerColor && isTherePiece && isTherePiece.color == playerColor
         },
         weaponImageCode: () => {
             return 'classic';
@@ -177,8 +174,7 @@ export default {
         validate: ({ gameEngine, square, playerColor, weaponsOnBoard }) => {
             let isTherePiece = gameEngine.get(square)
             //TODO: weapon do no effect other weapons
-            let isThereWeapon = weaponsOnBoard[square];
-            return !isThereWeapon && gameEngine.turn() === playerColor && isTherePiece && isTherePiece.color != playerColor
+            return crossWeaponValid(isTherePiece,weaponsOnBoard,square) && gameEngine.turn() === playerColor && isTherePiece && isTherePiece.color != playerColor
         },
         weaponImageCode: () => {
             return 'classic';
@@ -241,4 +237,10 @@ const movePiece = (weaponsOnBoard, targetSquare, sourceSquare, gameEngine) => {
 
 const PieceDurationTick = (weaponsOnBoard, targetSquare) => {
     weaponsOnBoard[targetSquare].duration = weaponsOnBoard[targetSquare].duration - 1
+}
+
+const crossWeaponValid = (isTherePiece,weaponsOnBoard,square) =>{
+    let isKing = isTherePiece.type == 'k'
+    let isThereWeapon = weaponsOnBoard[square];
+    return !isThereWeapon && !isKing
 }
