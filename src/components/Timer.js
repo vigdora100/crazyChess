@@ -55,6 +55,7 @@ class Timer extends Component {
                         <DigitsWrapper>
                             <CompundTimer.Minutes />
                         </DigitsWrapper>
+                        :
                         <DigitsWrapper >
                             <CompundTimer.Seconds />
                         </DigitsWrapper>
