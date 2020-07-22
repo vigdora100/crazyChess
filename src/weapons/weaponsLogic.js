@@ -240,7 +240,7 @@ const PieceDurationTick = (weaponsOnBoard, targetSquare) => {
 }
 
 const crossWeaponValid = (isTherePiece,weaponsOnBoard,square) =>{
-    let isKing = isTherePiece.type == 'k'
+    let isKing = isTherePiece && isTherePiece.type == 'k'
     let isThereWeapon = weaponsOnBoard[square];
     return !isThereWeapon && !isKing
 }
